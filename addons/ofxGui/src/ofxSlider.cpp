@@ -105,7 +105,7 @@ bool ofxSlider<Type>::mouseReleased(ofMouseEventArgs & args){
 
 template<typename Type>
 typename std::enable_if<std::is_integral<Type>::value, Type>::type
-getRange(Type min, Type max, float width){
+getSliderRange(Type min, Type max, float width){
 	double range = max - min;
 	range /= width*4;
 	return std::max(range,1.0);
@@ -113,7 +113,7 @@ getRange(Type min, Type max, float width){
 
 template<typename Type>
 typename std::enable_if<std::is_floating_point<Type>::value, Type>::type
-getRange(Type min, Type max, float width){
+getSliderRange(Type min, Type max, float width){
 	double range = max - min;
 	range /= width*4;
 	return range;
@@ -123,7 +123,7 @@ template<typename Type>
 bool ofxSlider<Type>::mouseScrolled(ofMouseEventArgs & args){
 	if(mouseInside){
 		if(args.scrollY>0 || args.scrollY<0){
-			double range = getRange(value.getMin(),value.getMax(),b.width);
+			double range = getSliderRange(value.getMin(),value.getMax(),b.width);
 			Type newValue = value + ofMap(args.scrollY,-1,1,-range, range);
 			newValue = ofClamp(newValue,value.getMin(),value.getMax());
 			value = newValue;

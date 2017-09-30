@@ -2,6 +2,11 @@
 #include "ofConstants.h"
 #include "ofAppRunner.h"
 
+#ifdef TARGET_QT
+#include <qopenglcontext.h>
+#include <qopenglfunctions_4_3_core.h>
+#endif
+
 
 ofBufferObject::Data::Data()
 :id(0)
@@ -253,7 +258,14 @@ void ofBufferObject::copyTo(ofBufferObject & dstBuffer, int readOffset, int writ
 
 
 void ofBufferObject::invalidate(){
+#ifdef TARGET_QT
+    QOpenGLContext *ctx = QOpenGLContext::currentContext();
+    assert(ctx);
+    QOpenGLFunctions_4_3_Core *f = ctx->versionFunctions<QOpenGLFunctions_4_3_Core>();
+	if(f) f->glInvalidateBufferData(data->id);
+#else
     glInvalidateBufferData(data->id);
+#endif
 }
 
 #endif

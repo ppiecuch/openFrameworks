@@ -4,7 +4,7 @@
 #include "ofBaseTypes.h"
 #include "ofPath.h"
 #include "ofRendererCollection.h"
-#if !defined(TARGET_OF_IOS) && !defined(TARGET_ANDROID) && !defined(TARGET_EMSCRIPTEN)
+#if !defined(TARGET_OF_IOS) && !defined(TARGET_ANDROID) && !defined(TARGET_EMSCRIPTEN) && !defined(TARGET_QT)
 #include "ofCairoRenderer.h"
 #endif
 #include "ofGLRenderer.h"
@@ -27,7 +27,7 @@ void ofSetCurrentRenderer(shared_ptr<ofBaseRenderer> renderer,bool setDefaults){
 	ofGetCurrentRenderer() = renderer;
 }
 
-#if !defined(TARGET_OF_IOS) && !defined(TARGET_ANDROID) && !defined(TARGET_EMSCRIPTEN)
+#if !defined(TARGET_OF_IOS) && !defined(TARGET_ANDROID) && !defined(TARGET_EMSCRIPTEN) && !defined(TARGET_QT)
 static shared_ptr<ofCairoRenderer> cairoScreenshot;
 static shared_ptr<ofBaseRenderer> storedRenderer;
 static shared_ptr<ofRendererCollection> rendererCollection;

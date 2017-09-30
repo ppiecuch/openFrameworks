@@ -10,6 +10,11 @@
 	#include "ofThreadChannel.h"
 	#include "ofThread.h"
 	static bool curlInited = false;
+#elif defined(TARGET_QT)
+    #include <QNetworkAccessManager>
+    #include <QNetworkRequest>
+    #include <QNetworkReply>
+    #include <QSslError>
 #endif
 
 int	ofHttpRequest::nextID = 0;
@@ -267,6 +272,143 @@ void ofURLFileLoaderImpl::update(ofEventArgs & args){
 
 ofURLFileLoader::ofURLFileLoader()
 :impl(new ofURLFileLoaderImpl){}
+
+#elif defined(TARGET_QT)
+
+class ofURLFileLoaderImpl: public ofThread, public ofBaseURLFileLoader{
+public:
+	ofURLFileLoaderImpl();
+    ofHttpResponse get(const string& url);
+    int getAsync(const string& url, const string& name=""); // returns id
+    ofHttpResponse saveTo(const string& url, const std::filesystem::path& path);
+    int saveAsync(const string& url, const std::filesystem::path& path);
+	void remove(int id);
+	void clear();
+    void stop();
+    ofHttpResponse handleRequest(const ofHttpRequest & request);
+    int handleRequestAsync(const ofHttpRequest& request); // returns id
+
+protected:
+	// threading -----------------------------------------------
+	void threadedFunction();
+    void start();
+    void update(ofEventArgs & args);  // notify in update so the notification is thread safe
+
+private:
+	// perform the requests on the thread
+
+	ofThreadChannel<ofHttpRequest> requests;
+	ofThreadChannel<ofHttpResponse> responses;
+	ofThreadChannel<int> cancelRequestQueue;
+	set<int> cancelledRequests;
+};
+
+ofURLFileLoaderImpl::ofURLFileLoaderImpl() {
+    // TODO
+}
+
+ofHttpResponse ofURLFileLoaderImpl::get(const string& url) {
+    ofHttpRequest request(url,url);
+    return handleRequest(request);
+}
+
+
+int ofURLFileLoaderImpl::getAsync(const string& url, const string& name){
+    ofHttpRequest request(url, name.empty() ? url : name);
+    requests.send(request);
+    start();
+    return request.getId();
+}
+
+
+ofHttpResponse ofURLFileLoaderImpl::saveTo(const string& url, const std::filesystem::path& path){
+    ofHttpRequest request(url,path.string(),true);
+    return handleRequest(request);
+}
+
+int ofURLFileLoaderImpl::saveAsync(const string& url, const std::filesystem::path& path){
+    ofHttpRequest request(url,path.string(),true);
+	requests.send(request);
+	start();
+	return request.getId();
+}
+
+void ofURLFileLoaderImpl::remove(int id){
+	cancelRequestQueue.send(id);
+}
+
+void ofURLFileLoaderImpl::clear(){
+	ofHttpResponse resp;
+	ofHttpRequest req;
+	while(requests.tryReceive(req)){}
+	while(responses.tryReceive(resp)){}
+}
+
+void ofURLFileLoaderImpl::start() {
+     if (!isThreadRunning()){
+		ofAddListener(ofEvents().update,this,&ofURLFileLoaderImpl::update);
+        startThread();
+    }
+}
+
+void ofURLFileLoaderImpl::stop() {
+    stopThread();
+    requests.close();
+    responses.close();
+    waitForThread();
+}
+
+void ofURLFileLoaderImpl::threadedFunction() {
+	setThreadName("ofURLFileLoader " + ofToString(getThreadId()));
+	while( isThreadRunning() ){
+		int cancelled;
+		while(cancelRequestQueue.tryReceive(cancelled)){
+			cancelledRequests.insert(cancelled);
+		}
+		ofHttpRequest request;
+		if(requests.receive(request)){
+			if(cancelledRequests.find(request.getId())==cancelledRequests.end()){
+				ofHttpResponse response(handleRequest(request));
+				int status = response.status;
+				if(!responses.send(move(response))){
+					break;
+				}
+				if(status==-1){
+					// retry
+					requests.send(request);
+				}
+			}else{
+				cancelledRequests.erase(cancelled);
+			}
+		}else{
+			break;
+		}
+	}
+}
+
+ofHttpResponse ofURLFileLoaderImpl::handleRequest(const ofHttpRequest & request) {
+    // TODO
+	return ofHttpResponse(request,-1,"ofURLFileLoader: fatal error, couldn't catch Exception");	
+}
+
+
+int ofURLFileLoaderImpl::handleRequestAsync(const ofHttpRequest& request){
+	requests.send(request);
+	start();
+	return request.getId();
+}
+
+void ofURLFileLoaderImpl::update(ofEventArgs & args){
+	ofHttpResponse response;
+	while(responses.tryReceive(response)){
+		ofNotifyEvent(ofURLResponseEvent(),response);
+	}
+
+}
+
+ofURLFileLoader::ofURLFileLoader()
+:impl(new ofURLFileLoaderImpl){}
+
 #endif
 
 ofHttpResponse ofURLFileLoader::get(const string& url){
@@ -305,10 +447,10 @@ int ofURLFileLoader::handleRequestAsync(const ofHttpRequest& request){
 	return impl->handleRequestAsync(request);
 }
 
-static bool initialized = false;
+static bool fileLoaderInitialized = false;
 static ofURLFileLoader & getFileLoader(){
 	static ofURLFileLoader * fileLoader = new ofURLFileLoader;
-	initialized = true;
+	fileLoaderInitialized = true;
 	return *fileLoader;
 }
 
@@ -393,7 +535,7 @@ void ofStopURLLoader(){
 }
 
 void ofURLFileLoaderShutdown(){
-	if(initialized){
+	if(fileLoaderInitialized){
 		ofRemoveAllURLRequests();
 		ofStopURLLoader();
 	}

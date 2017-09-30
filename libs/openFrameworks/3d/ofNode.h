@@ -217,7 +217,7 @@ public:
 	/// \param param0 Desired local scale for all axes as ref to 3D vector where 1 = 100%.
 	void setScale(const glm::vec3& s);
 	
-	/// \}
+    /// \}
 	/// \name Modifiers
 	/// \{
 

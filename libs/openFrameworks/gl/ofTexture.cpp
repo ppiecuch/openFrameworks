@@ -739,7 +739,7 @@ void ofTexture::generateMipmap(){
 			static bool warningIssuedAlready = false;
 			
 			if (!warningIssuedAlready){
-				ofLogWarning() << "Mipmaps are not supported for textureTarget 0x" << hex << texData.textureTarget << endl
+				ofLogWarning() << "Mipmaps are not supported for textureTarget 0x" << std::hex << texData.textureTarget << endl
 				<< "Most probably you are trying to create mipmaps from a GL_TEXTURE_RECTANGLE texture." << endl
 				<< "Try ofDisableArbTex() before loading this texture.";
 				warningIssuedAlready = true;
@@ -963,7 +963,7 @@ void ofTexture::setTextureMinMagFilter(GLint minFilter, GLint magFilter){
 	if ( (minFilter > GL_LINEAR) && texData.hasMipmap == false ){
 		static bool hasWarnedNoMipmapsForMinFilter = false;
 		if(!hasWarnedNoMipmapsForMinFilter) {
-			ofLogWarning() << "Texture has no mipmaps - but minFilter 0x"<< hex << minFilter << " requires mipmaps."
+			ofLogWarning() << "Texture has no mipmaps - but minFilter 0x"<< std::hex << minFilter << " requires mipmaps."
 			<< endl << "Call ofTexture::generateMipmaps() first.";
 		}
 		hasWarnedNoMipmapsForMinFilter = true;

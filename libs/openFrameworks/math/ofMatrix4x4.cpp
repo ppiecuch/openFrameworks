@@ -1461,6 +1461,9 @@ ofQuaternion snuggle(ofQuaternion q, HVect *k)
 	}
 	k->x() = ka[X]; k->y() = ka[Y]; k->z() = ka[Z];
 	return (p);
+#undef sgn
+#undef swap
+#undef cycle
 }
 
 /******* Decompose Affine Matrix *******/
@@ -1537,4 +1540,10 @@ void ofMatrix4x4::decompose( ofVec3f& t,
     so.set(parts.u.x(), parts.u.y(), parts.u.z(), parts.u.w());
 }
 
+#undef QX
+#undef QY
+#undef QZ
+#undef QW
+
 #undef SET_ROW
+#undef INNER_PRODUCT

@@ -289,11 +289,6 @@ ofVec3f ofQuaternion::getEuler() const {
 	return ofVec3f(ofRadToDeg(bank), ofRadToDeg(heading), ofRadToDeg(attitude));
 }
 
-#define QX  _v.x
-#define QY  _v.y
-#define QZ  _v.z
-#define QW  _v.w
-
 //----------------------------------------
 std::ostream& operator<<(std::ostream& os, const ofQuaternion &q) {
     os << q._v.x << ", " << q._v.y << ", " << q._v.z << ", " << q._v.w;

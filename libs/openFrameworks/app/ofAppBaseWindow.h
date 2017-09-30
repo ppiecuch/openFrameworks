@@ -99,6 +99,11 @@ public:
 	virtual HGLRC getWGLContext(){return 0;}
 	virtual HWND getWin32Window(){return 0;}
 #endif
+
+#if defined(TARGET_QT)
+    virtual void * getQtContext(){return nullptr;}
+    virtual void * getQtWindow(){return nullptr;}
+#endif
 };
 
 class ofAppBaseGLWindow: public ofAppBaseWindow{

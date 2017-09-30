@@ -169,16 +169,6 @@ A clampedMultiply(const A& a, const B& b) {
 }
 
 template<typename PixelType>
-float ofColor_<PixelType>::limit() {
-	return numeric_limits<PixelType>::max();
-}
-
-template<>
-float ofColor_<float>::limit() {
-	return 1.f;
-}
-
-template<typename PixelType>
 ofColor_<PixelType>::ofColor_(float _r, float _g, float _b, float _a):
     r(_r),
     g(_g),

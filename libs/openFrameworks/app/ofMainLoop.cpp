@@ -13,6 +13,8 @@
 // default windowing
 #ifdef TARGET_NODISPLAY
 	#include "ofAppNoWindow.h"
+#elif defined(TARGET_QT)
+	#include "ofAppQtWindow.h"
 #elif defined(TARGET_OF_IOS)
 	#include "ofAppiOSWindow.h"
 #elif defined(TARGET_ANDROID)
@@ -44,7 +46,9 @@ shared_ptr<ofAppBaseWindow> ofMainLoop::createWindow(const ofWindowSettings & se
 #ifdef TARGET_NODISPLAY
 	shared_ptr<ofAppNoWindow> window = shared_ptr<ofAppNoWindow>(new ofAppNoWindow());
 #else
-	#if defined(TARGET_OF_IOS)
+	#if defined(TARGET_QT)
+	shared_ptr<ofAppQtWindow> window = shared_ptr<ofAppQtWindow>(new ofAppQtWindow());
+	#elif defined(TARGET_OF_IOS)
 	shared_ptr<ofAppiOSWindow> window = shared_ptr<ofAppiOSWindow>(new ofAppiOSWindow());
 	#elif defined(TARGET_ANDROID)
 	shared_ptr<ofAppAndroidWindow> window = shared_ptr<ofAppAndroidWindow>(new ofAppAndroidWindow());

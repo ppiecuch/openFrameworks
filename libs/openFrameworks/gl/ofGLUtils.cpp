@@ -1,5 +1,6 @@
 #include "ofGLUtils.h"
 
+#include <assert.h>
 #include <set>
 #include "ofGLProgrammableRenderer.h"
 #include "ofGraphics.h"
@@ -7,6 +8,14 @@
 #include "ofBaseTypes.h"
 #include "ofRendererCollection.h"
 #include "ofLog.h"
+
+#ifndef GL_DEBUG_OUTPUT
+#define GL_DEBUG_OUTPUT                   0x92E0
+#endif
+
+#ifdef TARGET_QT
+#include <qopenglcontext.h>
+#endif
 
 //---------------------------------
 int ofGetGlInternalFormat(const ofPixels& pix) {
@@ -748,6 +757,10 @@ bool ofGLCheckExtension(string searchName){
 	set<string> extensionsSet;
 	extensionsSet.insert(extensionsList.begin(),extensionsList.end());
 	return extensionsSet.find(searchName)!=extensionsSet.end();
+#elif defined( TARGET_QT )
+    QOpenGLContext *ctx = QOpenGLContext::currentContext();
+    assert(ctx);
+    return ctx->hasExtension(searchName.c_str());
 #else
 	return glewIsSupported(searchName.c_str());
 #endif
@@ -844,11 +857,25 @@ namespace{
 	}
 }
 
+#define GET_DEBUG_PROC_ADDRESS(procName) \
+    reinterpret_cast< procName ## _t >( QOpenGLContext::currentContext()->getProcAddress(QByteArrayLiteral( #procName )) );
+
 void ofEnableGLDebugLog(){
+#ifdef TARGET_QT
+    typedef void (*glDebugMessageCallback_t)(GLDEBUGPROC callback, const void *userParam);
+    static glDebugMessageCallback_t qDebugMessageCallback = 0;
+    assert(QOpenGLContext::currentContext());
+    qDebugMessageCallback = GET_DEBUG_PROC_ADDRESS(glDebugMessageCallback);
+	if(qDebugMessageCallback && ofGLCheckExtension("GL_KHR_debug") && ofGLCheckExtension("GL_ARB_debug_output")){
+		glEnable(GL_DEBUG_OUTPUT);
+		qDebugMessageCallback((GLDEBUGPROC)gl_debug_callback, nullptr);
+	}
+#else
 	if(ofGLCheckExtension("GL_KHR_debug") && ofGLCheckExtension("GL_ARB_debug_output")){
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback((GLDEBUGPROC)gl_debug_callback, nullptr);
 	}
+#endif
 }
 
 void ofDisableGLDebugLog(){

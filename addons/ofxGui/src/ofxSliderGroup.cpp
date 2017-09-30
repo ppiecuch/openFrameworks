@@ -9,7 +9,7 @@ ofxVecSlider_<VecType>::ofxVecSlider_(ofParameter<VecType> value, float width, f
 
 template<class VecType>
 ofxVecSlider_<VecType> * ofxVecSlider_<VecType>::setup(ofParameter<VecType> value, float width, float height){
-    ofxGuiGroup::setup(value.getName(), "", 0, 0);
+    ofxGroupGui::setup(value.getName(), "", 0, 0);
     
     parameters.clear();
     
@@ -127,7 +127,7 @@ ofxColorSlider_<ColorType>::ofxColorSlider_(ofParameter<ofColor_<ColorType> > va
 
 template<class ColorType>
 ofxColorSlider_<ColorType> * ofxColorSlider_<ColorType>::setup(ofParameter<ofColor_<ColorType> > value, float width, float height){
-    ofxGuiGroup::setup(value.getName(), "", 0, 0);
+    ofxGroupGui::setup(value.getName(), "", 0, 0);
     parameters.clear();
 
     const string names[4] = {"r", "g", "b", "a"};

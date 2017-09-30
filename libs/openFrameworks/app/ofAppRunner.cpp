@@ -21,7 +21,9 @@
 
 #include "ofMainLoop.h"
 
-#if !defined( TARGET_OF_IOS ) & !defined(TARGET_ANDROID) & !defined(TARGET_EMSCRIPTEN) & !defined(TARGET_RASPBERRY_PI)
+#ifdef QT_GUI_LIB
+    // nothing
+#elif !defined( TARGET_OF_IOS ) & !defined(TARGET_ANDROID) & !defined(TARGET_EMSCRIPTEN) & !defined(TARGET_RASPBERRY_PI)
 	#include "ofAppGLFWWindow.h"
 	//special case so we preserve supplied settngs
 	//TODO: remove me when we remove the ofAppGLFWWindow setters.
@@ -73,7 +75,20 @@ namespace{
 		return *noopEvents;
 	}
 
-    #if defined(TARGET_LINUX) || defined(TARGET_OSX)
+#ifdef TARGET_QT
+	QCoreApplication & qapplication(){
+        int argc = 1;
+        char *argv[] = { "of-qt-apprunner" };
+#ifdef QT_WIDGETS_LIB
+        static QApplication *app = new QApplication(argc, argv);
+#else
+        static QGuiApplication *app = new QGuiApplication(arrc, argv);
+#endif
+		return *app;
+	}
+#endif
+
+    #if defined(TARGET_LINUX) || defined(TARGET_OSX) || defined(QT_OS_MAC) || defined(QT_OS_LINUX)
         #include <signal.h>
         #include <string.h>
         void ofSignalHandler(int signum){
@@ -108,13 +123,17 @@ void ofInit(){
 	initialized() = true;
 	exiting() = false;
 
+#ifdef TARGET_QT
+    qapplication();
+#endif
+
 #if defined(TARGET_ANDROID) || defined(TARGET_OF_IOS)
     // manage own exit
 #else
 	atexit(ofExitCallback);
 #endif
 
-#if defined(TARGET_LINUX) || defined(TARGET_OSX)
+#if defined(TARGET_LINUX) || defined(TARGET_OSX) || defined(QT_OS_MAC) || defined(QT_OS_LINUX)
 	// see http://www.gnu.org/software/libc/manual/html_node/Termination-Signals.html#Termination-Signals
 	signal(SIGTERM, &ofSignalHandler);
 	signal(SIGQUIT, &ofSignalHandler);
@@ -139,7 +158,7 @@ void ofInit(){
 								// info here:http://www.geisswerks.com/ryan/FAQS/timing.html
 	#endif
 
-#ifdef TARGET_LINUX
+#if defined(TARGET_LINUX) || defined(QT_OS_LINUX)
 	if(std::locale().name() == "C"){
 		try{
 			std::locale::global(std::locale("C.UTF-8"));
@@ -197,7 +216,7 @@ int ofRunMainLoop(){
 
 //--------------------------------------
 void ofSetupOpenGL(int w, int h, ofWindowMode screenMode){
-#ifdef TARGET_OPENGLES
+#if defined(TARGET_OPENGLES) || defined(QT_OPENGL_ES_2)
 	ofGLESWindowSettings settings;
 	settings.glesVersion = 1;
 #else
@@ -248,9 +267,11 @@ void ofExitCallback(){
 	#endif
 
 
+#ifndef TARGET_QT
 	//------------------------
 	// try to close freeImage:
-	ofCloseFreeImage();
+    ofCloseFreeImage();
+#endif
 
 
 	#ifdef WIN32_HIGH_RES_TIMING
@@ -502,5 +523,15 @@ HGLRC ofGetWGLContext(){
 
 HWND ofGetWin32Window(){
 	return mainLoop()->getCurrentWindow()->getWin32Window();
+}
+#endif
+
+#if defined(TARGET_QT)
+void * ofGetQtContext(){
+	return mainLoop()->getCurrentWindow()->getQtContext();
+}
+
+void * ofGetQtWindow(){
+	return mainLoop()->getCurrentWindow()->getQtWindow();
 }
 #endif

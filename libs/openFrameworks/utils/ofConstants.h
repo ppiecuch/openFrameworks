@@ -44,7 +44,9 @@ enum ofTargetPlatform{
 	OF_TARGET_LINUXARMV7L,
 	/// \brief Compiled to javascript using Emscripten.
 	/// \sa https://github.com/kripken/emscripten
-	OF_TARGET_EMSCRIPTEN
+	OF_TARGET_EMSCRIPTEN,
+	/// \brief Qt based build.
+	OF_TARGET_QT,
 };
 
 // core: ---------------------------
@@ -104,7 +106,13 @@ enum ofTargetPlatform{
 // 		helpful:
 // 		http://www.ogre3d.org/docs/api/html/OgrePlatform_8h-source.html
 
-#if defined( __WIN32__ ) || defined( _WIN32 )
+#if defined(QT_GUI_LIB) || defined(QT_OPENGL_LIB)
+	#define TARGET_QT
+    #ifdef QT_OPENGL_ES_2
+        #define TARGET_OPENGLES
+    #endif
+	#define TARGET_IMPLEMENTS_URL_LOADER
+#elif defined( __WIN32__ ) || defined( _WIN32 )
 	#define TARGET_WIN32
 #elif defined( __APPLE_CC__)
     #define __ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES 0
@@ -147,6 +155,10 @@ enum ofTargetPlatform{
 
 
 // then the the platform specific includes:
+#ifdef TARGET_QT
+    #include <QtOpenGL/qgl.h>
+#endif
+
 #ifdef TARGET_WIN32
 	#define GLEW_STATIC
 	#define GLEW_NO_GLU
@@ -299,7 +311,10 @@ typedef TESSindex ofIndexType;
 
 //------------------------------------------------ capture
 // check if any video capture system is already defined from the compiler
-#if !defined(OF_VIDEO_CAPTURE_GSTREAMER) && !defined(OF_VIDEO_CAPTURE_QUICKTIME) && !defined(OF_VIDEO_CAPTURE_DIRECTSHOW) && !defined(OF_VIDEO_CAPTURE_ANDROID) && !defined(OF_VIDEO_CAPTURE_IOS)
+#ifdef QT_MULTIMEDIA_LIB
+  // use Qt multimedia framework
+  #define OF_VIDEO_CAPTURE_QT
+#elif !defined(OF_VIDEO_CAPTURE_GSTREAMER) && !defined(OF_VIDEO_CAPTURE_QUICKTIME) && !defined(OF_VIDEO_CAPTURE_DIRECTSHOW) && !defined(OF_VIDEO_CAPTURE_ANDROID) && !defined(OF_VIDEO_CAPTURE_IOS)
 	#ifdef TARGET_LINUX
 
 		#define OF_VIDEO_CAPTURE_GSTREAMER
@@ -347,7 +362,10 @@ typedef TESSindex ofIndexType;
 
 //------------------------------------------------  video player
 // check if any video player system is already defined from the compiler
-#if !defined(OF_VIDEO_PLAYER_GSTREAMER) && !defined(OF_VIDEO_PLAYER_IOS) && !defined(OF_VIDEO_PLAYER_DIRECTSHOW) && !defined(OF_VIDEO_PLAYER_QUICKTIME) && !defined(OF_VIDEO_PLAYER_AVFOUNDATION) && !defined(OF_VIDEO_PLAYER_EMSCRIPTEN)
+#ifdef QT_MULTIMEDIA_LIB
+  // use Qt multimedia framework
+  #define OF_VIDEO_PLAYER_QT
+#elif !defined(OF_VIDEO_PLAYER_GSTREAMER) && !defined(OF_VIDEO_PLAYER_IOS) && !defined(OF_VIDEO_PLAYER_DIRECTSHOW) && !defined(OF_VIDEO_PLAYER_QUICKTIME) && !defined(OF_VIDEO_PLAYER_AVFOUNDATION) && !defined(OF_VIDEO_PLAYER_EMSCRIPTEN)
     #ifdef TARGET_LINUX
         #define OF_VIDEO_PLAYER_GSTREAMER
     #elif defined(TARGET_ANDROID)
@@ -374,7 +392,10 @@ typedef TESSindex ofIndexType;
 
 //------------------------------------------------ soundstream
 // check if any soundstream api is defined from the compiler
-#if !defined(OF_SOUNDSTREAM_RTAUDIO) && !defined(OF_SOUNDSTREAM_ANDROID) && !defined(OF_SOUNDSTREAM_IOS) && !defined(OF_SOUNDSTREAM_EMSCRIPTEN)
+#ifdef QT_MULTIMEDIA_LIB
+  // use Qt multimedia framework
+  #define OF_SOUNDSTREAM_QT
+#elif !defined(OF_SOUNDSTREAM_RTAUDIO) && !defined(OF_SOUNDSTREAM_ANDROID) && !defined(OF_SOUNDSTREAM_IOS) && !defined(OF_SOUNDSTREAM_EMSCRIPTEN)
 	#if defined(TARGET_LINUX) || defined(TARGET_WIN32) || defined(TARGET_OSX)
 		#define OF_SOUNDSTREAM_RTAUDIO
 	#elif defined(TARGET_ANDROID)
@@ -388,7 +409,10 @@ typedef TESSindex ofIndexType;
 
 //------------------------------------------------ soundplayer
 // check if any soundplayer api is defined from the compiler
-#if !defined(OF_SOUND_PLAYER_QUICKTIME) && !defined(OF_SOUND_PLAYER_FMOD) && !defined(OF_SOUND_PLAYER_OPENAL) && !defined(OF_SOUND_PLAYER_EMSCRIPTEN)
+#ifdef QT_MULTIMEDIA_LIB
+  // use Qt multimedia framework
+  #define OF_SOUND_PLAYER_QT
+#elif !defined(OF_SOUND_PLAYER_QUICKTIME) && !defined(OF_SOUND_PLAYER_FMOD) && !defined(OF_SOUND_PLAYER_OPENAL) && !defined(OF_SOUND_PLAYER_EMSCRIPTEN)
   #ifdef TARGET_OF_IOS
   	#define OF_SOUND_PLAYER_IPHONE
   #elif defined(TARGET_LINUX)
@@ -947,4 +971,3 @@ using ofDefaultVertexType = ofDefaultVec3;
 using ofDefaultNormalType = ofDefaultVec3;
 using ofDefaultColorType = ofFloatColor;
 using ofDefaultTexCoordType = ofDefaultVec2;
-

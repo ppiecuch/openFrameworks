@@ -5,6 +5,11 @@
 #include "ofBaseTypes.h"
 #include "ofTypes.h"
 
+#ifdef OF_VIDEO_PLAYER_QT
+	#include "ofQtMediaPlayer.h"
+	#define OF_VID_PLAYER_TYPE ofQtMediaPlayer
+#endif
+
 #ifdef OF_VIDEO_PLAYER_GSTREAMER
 	#include "ofGstVideoPlayer.h"
 	#define OF_VID_PLAYER_TYPE ofGstVideoPlayer

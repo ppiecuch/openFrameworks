@@ -1385,6 +1385,7 @@ bool ofPixels_<PixelType>::pasteInto(ofPixels_<PixelType> &dst, size_t xTo, size
 	return true;
 }
 
+#define clampedAdd ofPixelsClampedAdd
 
 template<typename A, typename B>
 inline A clampedAdd(const A& a, const B& b) {
@@ -1450,3 +1451,5 @@ template class ofPixels_<long>;
 template class ofPixels_<unsigned long>;
 template class ofPixels_<float>;
 template class ofPixels_<double>;
+
+#undef clampedAdd

@@ -6,7 +6,10 @@
 #include <chrono>
 #include <numeric>
 #include <locale>
-#include "uriparser/Uri.h"
+#ifdef QT_CORE_LIB
+#else
+# include "uriparser/Uri.h"
+#endif
 
 #ifdef TARGET_WIN32	 // For ofLaunchBrowser.
 	#include <shellapi.h>
@@ -823,6 +826,16 @@ string ofVAArgsToString(const char * format, va_list args){
 
 //--------------------------------------------------
 void ofLaunchBrowser(const string& url, bool uriEncodeQuery){
+#ifdef QT_CORE_LIB
+    QUrl uri(url.c_str());
+	if(!uri.isValid()){
+		ofLogError("ofUtils") << "ofLaunchBrowser(): malformed url \"" << url << "\""
+            << " (" << uri.errorString().toStdString() << ")";
+		return;
+	}
+	std::string scheme = uri.scheme().toStdString();
+    std::string uriStr = uri.url().toStdString();
+#else
 	UriParserStateA state;
 	UriUriA uri;
 	state.uri = &uri;
@@ -842,6 +855,7 @@ void ofLaunchBrowser(const string& url, bool uriEncodeQuery){
 	uriToStringA(buffer.data(), &uri, url.size()*2, &written);
 	std::string uriStr(buffer.data(), written-1);
 	uriFreeUriMembersA(&uri);
+#endif
 
 
 	// http://support.microsoft.com/kb/224816

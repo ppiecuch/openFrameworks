@@ -2,11 +2,15 @@
 #include "ofAppRunner.h"
 #include "ofTypes.h"
 #include "ofGraphics.h"
-#include "FreeImage.h"
+#if defined(TARGET_QT)
+# include "qimage.h"
+#else
+# include "FreeImage.h"
+# include "uriparser/Uri.h"
+#endif
 #include "ofConstants.h"
 
 #include "ofURLFileLoader.h"
-#include "uriparser/Uri.h"
 
 #if defined(TARGET_ANDROID)
 #include "ofxAndroidUtils.h"
@@ -15,6 +19,94 @@
 ofImageLoadSettings ofImageLoadSettings::defaultSetting;
 
 
+#if defined(TARGET_QT)
+template<typename PixelType>
+QImage::Format getFormatFromPixelType(const ofPixels_<PixelType>& pix) {
+
+	if(sizeof(PixelType)==1){
+        return QImage::Format_Indexed8;
+	}else if(sizeof(PixelType)==2){
+        return QImage::Format_RGB16;
+	}else if(sizeof(PixelType)==4){
+        return QImage::Format_ARGB32;
+	}else{
+		ofLogError("getFormatFromPixelType") << "unknown pixel format defauls to QImage::Format_ARGB32";
+        return QImage::Format_ARGB32;
+    }
+}
+
+template<typename PixelType>
+QImage getQImageFromPixels(const ofPixels_<PixelType>& pix) {
+	const PixelType* pixels = pix.getData();
+	const unsigned int width = pix.getWidth();
+	const unsigned int height = pix.getHeight();
+    const unsigned int bpp = pix.getBitsPerPixel();
+	return QImage((uchar*)pixels, width, height, getFormatFromPixelType(pix));
+}
+
+template<typename PixelType>
+bool putQImageIntoPixels(QImage result, ofPixels_<PixelType>& pix) {
+    QImage::Format dest = getFormatFromPixelType( pix );
+    if (dest != result.format()){
+        result = result.convertToFormat(dest);
+    }
+    unsigned int bpp = result.depth();
+	unsigned int channels = (bpp / sizeof(PixelType)) / 8;
+#ifdef TARGET_LITTLE_ENDIAN
+    bool swapRG = channels && swapOnLittleEndian && (bpp/channels == 8);
+#else
+    bool swapRG = false;
+#endif
+	ofPixelFormat pixFormat;
+    if(channels==1) pixFormat=OF_PIXELS_GRAY;
+    if(swapRG){
+		if(channels==3) pixFormat=OF_PIXELS_BGR;
+		if(channels==4) pixFormat=OF_PIXELS_BGRA;
+	}else{
+		if(channels==3) pixFormat=OF_PIXELS_RGB;
+		if(channels==4) pixFormat=OF_PIXELS_RGBA;
+    }
+	const unsigned char* bmpBits = result.constBits();
+	if(bmpBits != nullptr) {
+		pix.setFromAlignedPixels((PixelType*) bmpBits, 
+                                 result.width(), result.height(), pixFormat, result.bytesPerLine());
+        return true;
+	} else {
+		ofLogError("ofImage") << "putBmpIntoPixels(): unable to set ofPixels from QImage";
+        return false;
+	}
+}
+
+template<typename PixelType>
+static bool loadImage(ofPixels_<PixelType> & pix, const std::filesystem::path& _fileName, const ofImageLoadSettings& settings){
+    QUrl uri(_fileName.c_str());
+	if(!uri.isValid()){
+		ofLogError("ofImage") << "loadImage(): malformed uri when loading image from uri " << _fileName 
+            << " (" << uri.errorString().toStdString() << ")";
+		return false;
+	}
+	std::string scheme = uri.scheme().toStdString();
+	if(scheme == "http" || scheme == "https"){
+		return ofLoadImage(pix, ofLoadURL(_fileName.string()).data);
+	}
+    QImage result(_fileName.string().c_str());
+    if (result.isNull()) {
+		ofLogError("ofImage") << "QImage: failed to load image";
+        return false;
+    }
+    return putQImageIntoPixels( result, pix );
+}
+
+template<typename PixelType>
+static bool loadImage(ofPixels_<PixelType> & pix, const ofBuffer & buffer, const ofImageLoadSettings &settings){
+    QImage result;
+    if (!result.loadFromData((unsigned char*) buffer.getData(), buffer.size())) {
+		ofLogError("ofImage") << "QImage: failed to load image from data";
+        return false;
+    }
+    return putQImageIntoPixels( result, pix );
+}
+#else
 //----------------------------------------------------------
 // static variable for freeImage initialization:
 void ofInitFreeImage(bool deinit=false){
@@ -285,6 +377,8 @@ static bool loadImage(ofPixels_<PixelType> & pix, const ofBuffer & buffer, const
 
 	return bLoaded;
 }
+#endif
+
 
 //----------------------------------------------------------------
 bool ofLoadImage(ofPixels & pix, const std::filesystem::path& path, const ofImageLoadSettings &settings) {
@@ -339,6 +433,31 @@ bool ofLoadImage(ofTexture & tex, const ofBuffer & buffer, const ofImageLoadSett
 }
 
 //----------------------------------------------------------------
+#if defined(TARGET_QT)
+template<typename PixelType>
+static void saveImage(const ofPixels_<PixelType> & _pix, const std::filesystem::path& _fileName, ofImageQualityType qualityLevel) {
+	// Make a local copy.
+	ofPixels_<PixelType> pix = _pix;
+
+	if (pix.isAllocated() == false){
+		ofLogError("ofImage") << "saveImage(): couldn't save \"" << _fileName << "\", pixels are not allocated";
+		return;
+	}
+	#ifdef TARGET_LITTLE_ENDIAN
+	if(sizeof(PixelType) == 1 && (pix.getPixelFormat()==OF_PIXELS_RGB || pix.getPixelFormat()==OF_PIXELS_RGBA)) {
+		pix.swapRgb();
+	}
+	#endif
+	QImage result = getQImageFromPixels(pix);
+    if (result.isNull()){
+		ofLogError("ofImage") << "QImage: failed to create image";
+    }else{
+        if(!result.save(_fileName.string().c_str())){
+            ofLogError("ofImage") << "QImage: failed to save image";
+        }
+    }
+}
+#else
 template<typename PixelType>
 static void saveImage(const ofPixels_<PixelType> & _pix, const std::filesystem::path& _fileName, ofImageQualityType qualityLevel) {
 	// Make a local copy.
@@ -412,6 +531,7 @@ static void saveImage(const ofPixels_<PixelType> & _pix, const std::filesystem::
 		FreeImage_Unload(bmp);
 	}
 }
+#endif
 
 //----------------------------------------------------------------
 void ofSaveImage(const ofPixels & pix, const std::filesystem::path& fileName, ofImageQualityType qualityLevel){
@@ -429,6 +549,20 @@ void ofSaveImage(const ofShortPixels & pix, const std::filesystem::path& fileNam
 }
 
 //----------------------------------------------------------------
+#if defined(TARGET_QT)
+template<typename PixelType>
+static void saveImage(const ofPixels_<PixelType> & _pix, ofBuffer & buffer, ofImageFormat format, ofImageQualityType qualityLevel) {
+	// thanks to alvaro casinelli for the implementation
+
+	// Make a local copy.
+	ofPixels_<PixelType> pix = _pix;
+
+	if (pix.isAllocated() == false){
+		ofLogError("ofImage","saveImage(): couldn't save to ofBuffer, pixels are not allocated");
+		return;
+	}
+}
+#else
 template<typename PixelType>
 static void saveImage(const ofPixels_<PixelType> & _pix, ofBuffer & buffer, ofImageFormat format, ofImageQualityType qualityLevel) {
 	// thanks to alvaro casinelli for the implementation
@@ -519,6 +653,7 @@ static void saveImage(const ofPixels_<PixelType> & _pix, ofBuffer & buffer, ofIm
 		   FreeImage_CloseMemory(hmem);
 	}
 }
+#endif
 
 //----------------------------------------------------------------
 void ofSaveImage(const ofPixels & pix, ofBuffer & buffer, ofImageFormat format, ofImageQualityType qualityLevel) {
@@ -534,11 +669,13 @@ void ofSaveImage(const ofShortPixels & pix, ofBuffer & buffer, ofImageFormat for
 }
 
 
+#if !defined(TARGET_QT)
 //----------------------------------------------------
 // freeImage based stuff:
 void ofCloseFreeImage(){
 	ofInitFreeImage(true);
 }
+#endif
 
 //-------------------------------------------------------------
 //  implementation
@@ -553,8 +690,10 @@ ofImage_<PixelType>::ofImage_(){
 	type						= OF_IMAGE_UNDEFINED;
 	bUseTexture					= true;		// the default is, yes, use a texture
 
+#if !defined(TARGET_QT)
 	//----------------------- init free image if necessary
 	ofInitFreeImage();
+#endif
 }
 
 //----------------------------------------------------------
@@ -566,9 +705,10 @@ ofImage_<PixelType>::ofImage_(const ofPixels_<PixelType> & pix){
 	type						= OF_IMAGE_UNDEFINED;
 	bUseTexture					= true;		// the default is, yes, use a texture
 
+#if !defined(TARGET_QT)
 	//----------------------- init free image if necessary
 	ofInitFreeImage();
-
+#endif
 
 	setFromPixels(pix);
 }
@@ -581,9 +721,10 @@ ofImage_<PixelType>::ofImage_(const std::filesystem::path & fileName, const ofIm
 	type						= OF_IMAGE_UNDEFINED;
 	bUseTexture					= true;		// the default is, yes, use a texture
 
+#if !defined(TARGET_QT)
 	//----------------------- init free image if necessary
 	ofInitFreeImage();
-
+#endif
 
 	load(fileName, settings);
 }
@@ -1126,6 +1267,15 @@ void ofImage_<PixelType>::mirror(bool vertical, bool horizontal){
 template<typename PixelType>
 void ofImage_<PixelType>::resizePixels(ofPixels_<PixelType> &pix, int newWidth, int newHeight){
 
+#ifdef TARGET_QT
+	QImage result = getQImageFromPixels(pix);
+    if (result.isNull()){
+		ofLogError("ofImage") << "QImage: failed to create image";
+    }else{
+        QImage sc = result.scaled(newWidth, newHeight);
+        putQImageIntoPixels(sc, pix);
+    }
+#else
 	FIBITMAP * bmp					= getBmpFromPixels(pix);
 	FIBITMAP * convertedBmp			= nullptr;
 
@@ -1134,12 +1284,25 @@ void ofImage_<PixelType>::resizePixels(ofPixels_<PixelType> &pix, int newWidth, 
 
 	if (bmp != nullptr)				FreeImage_Unload(bmp);
 	if (convertedBmp != nullptr)		FreeImage_Unload(convertedBmp);
+#endif
 }
 
 //----------------------------------------------------
 template<typename PixelType>
 void ofImage_<PixelType>::changeTypeOfPixels(ofPixels_<PixelType> &pix, ofImageType newType){
-	int oldType = pix.getImageType();
+
+#ifdef TARGET_QT
+    QImage result = getQImageFromPixels( pix );
+    if (result.isNull()) {
+		ofLogError("ofImage") << "QImage: failed to load image";
+    }
+    QImage::Format dest = getFormatFromPixelType( pix );
+    if (dest != result.format()){
+        QImage cv = result.convertToFormat(dest);
+        putQImageIntoPixels(cv, pix);
+    }
+#else
+    int oldType = pix.getImageType();
 		
 	if (oldType == newType) {
 		return; // no need to reallocate
@@ -1171,6 +1334,7 @@ void ofImage_<PixelType>::changeTypeOfPixels(ofPixels_<PixelType> &pix, ofImageT
 	if (convertedBmp != nullptr) {
 		FreeImage_Unload(convertedBmp);
 	}
+#endif
 }
 
 

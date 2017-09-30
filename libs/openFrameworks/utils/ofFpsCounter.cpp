@@ -76,3 +76,6 @@ uint64_t ofFpsCounter::getLastFrameNanos() const{
 double ofFpsCounter::getLastFrameSecs() const{
 	return lastFrameTime*NANOS_TO_SEC;
 }
+
+#undef NANOS_PER_SEC
+#undef NANOS_TO_SEC

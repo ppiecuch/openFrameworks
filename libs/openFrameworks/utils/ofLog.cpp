@@ -1,6 +1,6 @@
 #include "ofLog.h"
 #include "ofConstants.h"
-#include <ofUtils.h>
+#include "ofUtils.h"
 #include <map>
 
 static ofLogLevel currentLogLevel =  OF_LOG_NOTICE;
@@ -15,6 +15,8 @@ static map<string,ofLogLevel> & getModules(){
 	static map<string,ofLogLevel> * modules = new map<string,ofLogLevel>;
 	return *modules;
 }
+
+#define noopDeleter ofLnoopDeleter
 
 static void noopDeleter(ofBaseLoggerChannel*){}
 #ifdef TARGET_ANDROID
@@ -381,3 +383,5 @@ void ofFileLoggerChannel::log(ofLogLevel level, const string & module, const cha
 	}
 	file << ofVAArgsToString(format,args) << endl;
 }
+
+#undef noopDeleter

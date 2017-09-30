@@ -1114,6 +1114,10 @@ inline bool ofVec3f::operator!=( const ofVec3f& vec ) const {
 	return (x != vec.x) || (y != vec.y) || (z != vec.z);
 }
 
+inline bool ofVec3f::operator!=( const glm::vec3& vec ) const {
+	return (x != vec.x) || (y != vec.y) || (z != vec.z);
+}
+
 inline bool ofVec3f::match( const ofVec3f& vec, float tolerance ) const{
 	return (fabs(x - vec.x) < tolerance)
 	&& (fabs(y - vec.y) < tolerance)

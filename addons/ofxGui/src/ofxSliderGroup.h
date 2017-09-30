@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ofxGuiGroup.h"
+#include "ofxGroupGui.h"
 #include "ofxSlider.h"
 
 template<class VecType>
-class ofxVecSlider_ : public ofxGuiGroup {
+class ofxVecSlider_ : public ofxGroupGui {
 public:
     ofxVecSlider_(){
         sliderChanging = false;
@@ -33,7 +33,7 @@ typedef ofxVecSlider_<ofDefaultVec4> ofxVec4Slider;
 typedef ofxVecSlider_<ofVec3f> ofxPointSlider;
 
 template<typename ColorType>
-class ofxColorSlider_: public ofxGuiGroup{
+class ofxColorSlider_: public ofxGroupGui{
 
 public:
 	ofxColorSlider_(){

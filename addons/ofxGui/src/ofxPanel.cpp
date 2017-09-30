@@ -17,7 +17,7 @@ ofxPanel::ofxPanel()
 :bGrabbed(false){}
 
 ofxPanel::ofxPanel(const ofParameterGroup & parameters, const std::string& filename, float x, float y)
-: ofxGuiGroup(parameters, filename, x, y)
+: ofxGroupGui(parameters, filename, x, y)
 , bGrabbed(false){
 	if(!loadIcon.isAllocated() || !saveIcon.isAllocated()){
 		loadIcons();
@@ -35,7 +35,7 @@ ofxPanel * ofxPanel::setup(const std::string& collectionName, const std::string&
 		loadIcons();
 	}
 	registerMouseEvents();
-	return (ofxPanel*)ofxGuiGroup::setup(collectionName,filename,x,y);
+	return (ofxPanel*)ofxGroupGui::setup(collectionName,filename,x,y);
 }
 
 ofxPanel * ofxPanel::setup(const ofParameterGroup & parameters, const std::string& filename, float x, float y){
@@ -43,7 +43,7 @@ ofxPanel * ofxPanel::setup(const ofParameterGroup & parameters, const std::strin
 		loadIcons();
 	}
 	registerMouseEvents();
-	return (ofxPanel*)ofxGuiGroup::setup(parameters,filename,x,y);
+	return (ofxPanel*)ofxGroupGui::setup(parameters,filename,x,y);
 }
 
 void ofxPanel::loadIcons(){
@@ -120,7 +120,7 @@ void ofxPanel::render(){
 
 bool ofxPanel::mouseReleased(ofMouseEventArgs & args){
     this->bGrabbed = false;
-    if(ofxGuiGroup::mouseReleased(args)) return true;
+    if(ofxGroupGui::mouseReleased(args)) return true;
     if(isGuiDrawing() && b.inside(ofPoint(args.x,args.y))){
     	return true;
     }else{

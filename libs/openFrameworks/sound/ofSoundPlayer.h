@@ -59,8 +59,12 @@ inline void ofSoundShutdown(){}
 #endif
 
 #ifdef OF_SOUND_PLAYER_EMSCRIPTEN
-#include "ofxEmscriptenSoundPlayer.h"
-#define OF_SOUND_PLAYER_TYPE ofxEmscriptenSoundPlayer
+#include "ofxQtSoundPlayer.h"
+#define OF_SOUND_PLAYER_TYPE ofxQtSoundPlayer
+#endif
+
+#ifdef QT_MULTIMEDIA_LIB
+
 #endif
 
 #ifdef TARGET_LINUX_ARM

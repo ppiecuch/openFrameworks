@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ofxGuiGroup.h"
+#include "ofxGroupGui.h"
 
 #ifndef TARGET_EMSCRIPTEN
 constexpr const char* ofxPanelDefaultFilename = "settings.xml";
@@ -8,9 +8,9 @@ constexpr const char* ofxPanelDefaultFilename = "settings.xml";
 constexpr const char* ofxPanelDefaultFilename = "settings.json";
 #endif
 
-class ofxGuiGroup;
+class ofxGroupGui;
 
-class ofxPanel : public ofxGuiGroup {
+class ofxPanel : public ofxGroupGui {
 public:
 	ofxPanel();
 	ofxPanel(const ofParameterGroup & parameters, const std::string& filename=ofxPanelDefaultFilename, float x = 10, float y = 10);

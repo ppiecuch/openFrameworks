@@ -86,3 +86,5 @@ void ofTimer::calculateNextPeriod(){
     }
 #endif
 }
+
+#undef NANOS_PER_SEC

@@ -673,3 +673,13 @@ template <typename PixelType>
 ofColor_<PixelType> operator*(float val, const ofColor_<PixelType> &color) {
 	return color * val;
 }
+
+template<typename PixelType>
+float ofColor_<PixelType>::limit() {
+	return numeric_limits<PixelType>::max();
+}
+
+template<>
+float ofColor_<float>::limit() {
+	return 1.f;
+}
