@@ -162,13 +162,15 @@ public:
 	void setCustomUniform2f(const std::string & name, glm::vec2 value);
 	void setCustomUniform3f(const std::string & name, glm::vec3 value);
 	void setCustomUniform4f(const std::string & name, glm::vec4 value);
+	void setCustomUniformMatrix4f(const std::string & name, glm::mat4 value);
+	void setCustomUniformMatrix3f(const std::string & name, glm::mat3 value);
 
 	void setCustomUniform1i(const std::string & name, int value);
 	void setCustomUniform2i(const std::string & name, glm::tvec2<int> value);
 	void setCustomUniform3i(const std::string & name, glm::tvec3<int> value);
 	void setCustomUniform4i(const std::string & name, glm::tvec4<int> value);
 	void setCustomUniformTexture(const std::string & name, const ofTexture & value, int textureLocation);
-	void setCustomUniformTexture(const string & name, int textureTarget, GLint textureID, int textureLocation);
+	void setCustomUniformTexture(const std::string & name, int textureTarget, GLint textureID, int textureLocation);
 
 
 
@@ -197,8 +199,8 @@ private:
 
 	mutable std::map<ofGLProgrammableRenderer*,std::shared_ptr<Shaders>> shaders;
 	static std::map<ofGLProgrammableRenderer*, std::map<std::string,std::weak_ptr<Shaders>>> shadersMap;
-	static string vertexShader;
-	static string fragmentShader;
+	static std::string vertexShader;
+	static std::string fragmentShader;
 	std::map<std::string, float> uniforms1f;
 	std::map<std::string, glm::vec2> uniforms2f;
 	std::map<std::string, glm::vec3> uniforms3f;
@@ -207,5 +209,7 @@ private:
 	std::map<std::string, glm::tvec2<int>> uniforms2i;
 	std::map<std::string, glm::tvec3<int>> uniforms3i;
 	std::map<std::string, glm::tvec4<int>> uniforms4i;
+	std::map<std::string, glm::mat4> uniforms4m;
+	std::map<std::string, glm::mat3> uniforms3m;
 	std::map<std::string, TextureUnifom> uniformstex;
 };

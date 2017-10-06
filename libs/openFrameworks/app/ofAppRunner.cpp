@@ -21,6 +21,8 @@
 
 #include "ofMainLoop.h"
 
+using namespace std;
+
 #ifdef QT_GUI_LIB
     // nothing
 #elif !defined( TARGET_OF_IOS ) & !defined(TARGET_ANDROID) & !defined(TARGET_EMSCRIPTEN) & !defined(TARGET_RASPBERRY_PI)
@@ -413,6 +415,16 @@ int ofGetWindowWidth(){
 //--------------------------------------------------
 int ofGetWindowHeight(){
 	return (int)mainLoop()->getCurrentWindow()->getWindowSize().y;
+}
+
+//--------------------------------------------------
+std::string ofGetClipboardString(){
+	return mainLoop()->getCurrentWindow()->getClipboardString();
+}
+
+//--------------------------------------------------
+void ofSetClipboardString(const std::string & str){
+	mainLoop()->getCurrentWindow()->setClipboardString(str);
 }
 
 //--------------------------------------------------

@@ -12,6 +12,8 @@
 	#include <limits.h>        /* PATH_MAX */
 #endif
 
+using namespace std;
+
 
 //------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------
@@ -653,7 +655,6 @@ bool ofFile::canRead() const {
 
 //------------------------------------------------------------------------------------------------------------
 bool ofFile::canWrite() const {
-	auto perm = std::filesystem::status(myFile).permissions();
 #ifdef TARGET_WIN32
 	DWORD attr = GetFileAttributes(myFile.native().c_str());
 	if (attr == INVALID_FILE_ATTRIBUTES){
@@ -662,6 +663,7 @@ bool ofFile::canWrite() const {
 		return (attr & FILE_ATTRIBUTE_READONLY) == 0;
 	}
 #else
+	auto perm = std::filesystem::status(myFile).permissions();
 	struct stat info;
 	stat(path().c_str(), &info);  // Error check omitted
 	if(geteuid() == info.st_uid){
@@ -771,8 +773,8 @@ void ofFile::setExecutable(bool flag){
 }
 
 //------------------------------------------------------------------------------------------------------------
-bool ofFile::copyTo(const string& _path, bool bRelativeToData, bool overwrite) const{
-	std::string path = _path;
+bool ofFile::copyTo(const filesystem::path& _path, bool bRelativeToData, bool overwrite) const{
+	auto path = _path;
 
 	if(path.empty()){
 		ofLogError("ofFile") << "copyTo(): destination path " << _path << " is empty";
@@ -827,8 +829,8 @@ bool ofFile::copyTo(const string& _path, bool bRelativeToData, bool overwrite) c
 }
 
 //------------------------------------------------------------------------------------------------------------
-bool ofFile::moveTo(const string& _path, bool bRelativeToData, bool overwrite){
-	std::string path = _path;
+bool ofFile::moveTo(const filesystem::path& _path, bool bRelativeToData, bool overwrite){
+	auto path = _path;
 
 	if(path.empty()){
 		ofLogError("ofFile") << "moveTo(): destination path is empty";
@@ -885,7 +887,7 @@ bool ofFile::moveTo(const string& _path, bool bRelativeToData, bool overwrite){
 }
 
 //------------------------------------------------------------------------------------------------------------
-bool ofFile::renameTo(const string& path, bool bRelativeToData, bool overwrite){
+bool ofFile::renameTo(const filesystem::path& path, bool bRelativeToData, bool overwrite){
 	return moveTo(path,bRelativeToData,overwrite);
 }
 
@@ -961,7 +963,7 @@ bool ofFile::operator>=(const ofFile & file) const {
 // ofFile Static Methods
 //------------------------------------------------------------------------------------------------------------
 
-bool ofFile::copyFromTo(const std::string& pathSrc, const std::string& pathDst, bool bRelativeToData,  bool overwrite){
+bool ofFile::copyFromTo(const std::filesystem::path& pathSrc, const std::filesystem::path& pathDst, bool bRelativeToData,  bool overwrite){
 	ofFile tmp;
 	if( bRelativeToData ){
 		tmp.open(pathSrc,ofFile::Reference);
@@ -973,7 +975,7 @@ bool ofFile::copyFromTo(const std::string& pathSrc, const std::string& pathDst, 
 
 //be careful with slashes here - appending a slash when moving a folder will causes mad headaches
 //------------------------------------------------------------------------------------------------------------
-bool ofFile::moveFromTo(const std::string& pathSrc, const std::string& pathDst, bool bRelativeToData, bool overwrite){
+bool ofFile::moveFromTo(const std::filesystem::path& pathSrc, const std::filesystem::path& pathDst, bool bRelativeToData, bool overwrite){
 	ofFile tmp;
 	if( bRelativeToData ){
 		tmp.open(pathSrc,ofFile::Reference);
@@ -984,7 +986,7 @@ bool ofFile::moveFromTo(const std::string& pathSrc, const std::string& pathDst, 
 }
 
 //------------------------------------------------------------------------------------------------------------
-bool ofFile::doesFileExist(const std::string& _fPath, bool bRelativeToData){
+bool ofFile::doesFileExist(const std::filesystem::path& _fPath, bool bRelativeToData){
 	ofFile tmp;
 	if(bRelativeToData){
 		tmp.open(_fPath,ofFile::Reference);
@@ -995,7 +997,7 @@ bool ofFile::doesFileExist(const std::string& _fPath, bool bRelativeToData){
 }
 
 //------------------------------------------------------------------------------------------------------------
-bool ofFile::removeFile(const std::string& _path, bool bRelativeToData){
+bool ofFile::removeFile(const std::filesystem::path& _path, bool bRelativeToData){
 	ofFile tmp;
 	if(bRelativeToData){
 		tmp.open(_path,ofFile::Reference);
@@ -1133,8 +1135,8 @@ bool ofDirectory::isDirectory() const {
 }
 
 //------------------------------------------------------------------------------------------------------------
-bool ofDirectory::copyTo(const std::string& _path, bool bRelativeToData, bool overwrite){
-	std::string path = _path;
+bool ofDirectory::copyTo(const std::filesystem::path& _path, bool bRelativeToData, bool overwrite){
+	auto path = _path;
 
 	if(myDir.string().empty()){
 		ofLogError("ofDirectory") << "copyTo(): source path is empty";
@@ -1188,16 +1190,16 @@ bool ofDirectory::copyTo(const std::string& _path, bool bRelativeToData, bool ov
 }
 
 //------------------------------------------------------------------------------------------------------------
-bool ofDirectory::moveTo(const std::string& path, bool bRelativeToData, bool overwrite){
+bool ofDirectory::moveTo(const std::filesystem::path& path, bool bRelativeToData, bool overwrite){
 	if(copyTo(path,bRelativeToData,overwrite)){
 		return remove(true);
-	}else{
-		return false;
 	}
+	
+	return false;
 }
 
 //------------------------------------------------------------------------------------------------------------
-bool ofDirectory::renameTo(const std::string& path, bool bRelativeToData, bool overwrite){
+bool ofDirectory::renameTo(const std::filesystem::path& path, bool bRelativeToData, bool overwrite){
 	return moveTo(path, bRelativeToData, overwrite);
 }
 
@@ -1381,8 +1383,8 @@ int ofDirectory::numFiles(){
 //------------------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------------------
-bool ofDirectory::removeDirectory(const std::string& _path, bool deleteIfNotEmpty, bool bRelativeToData){
-	std::string path = _path;
+bool ofDirectory::removeDirectory(const std::filesystem::path& _path, bool deleteIfNotEmpty, bool bRelativeToData){
+	auto path = _path;
 
 	ofFile dirToRemove;
 	if(bRelativeToData){
@@ -1395,9 +1397,8 @@ bool ofDirectory::removeDirectory(const std::string& _path, bool deleteIfNotEmpt
 }
 
 //------------------------------------------------------------------------------------------------------------
-bool ofDirectory::createDirectory(const std::string& _dirPath, bool bRelativeToData, bool recursive){
-	
-	std::string dirPath = _dirPath;
+bool ofDirectory::createDirectory(const std::filesystem::path& _dirPath, bool bRelativeToData, bool recursive){
+	auto dirPath = _dirPath;
 
 	if(bRelativeToData){
 		dirPath = ofToDataPath(dirPath);
@@ -1423,21 +1424,15 @@ bool ofDirectory::createDirectory(const std::string& _dirPath, bool bRelativeToD
 			return false;
 		}
 		return success;
-		
-	} else {
-		
-		// no need to create it - it already exists.
-		return true;
 	}
-
-
-
 	
+	// no need to create it - it already exists.
+	return true;
 }
 
 //------------------------------------------------------------------------------------------------------------
-bool ofDirectory::doesDirectoryExist(const std::string& _dirPath, bool bRelativeToData){
-	std::string dirPath = _dirPath;
+bool ofDirectory::doesDirectoryExist(const std::filesystem::path& _dirPath, bool bRelativeToData){
+	auto dirPath = _dirPath;
 	try {
 		if (bRelativeToData) {
 			dirPath = ofToDataPath(dirPath);
@@ -1451,8 +1446,8 @@ bool ofDirectory::doesDirectoryExist(const std::string& _dirPath, bool bRelative
 }
 
 //------------------------------------------------------------------------------------------------------------
-bool ofDirectory::isDirectoryEmpty(const std::string& _dirPath, bool bRelativeToData){
-	std::string dirPath = _dirPath;
+bool ofDirectory::isDirectoryEmpty(const std::filesystem::path& _dirPath, bool bRelativeToData){
+	auto dirPath = _dirPath;
 	if(bRelativeToData){
 		dirPath = ofToDataPath(dirPath);
 	}

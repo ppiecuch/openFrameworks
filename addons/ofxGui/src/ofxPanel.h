@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ofxGroupGui.h"
+#include "ofxGuiGroup.h"
+#include "ofImage.h"
 
 #ifndef TARGET_EMSCRIPTEN
 constexpr const char* ofxPanelDefaultFilename = "settings.xml";
@@ -8,9 +9,9 @@ constexpr const char* ofxPanelDefaultFilename = "settings.xml";
 constexpr const char* ofxPanelDefaultFilename = "settings.json";
 #endif
 
-class ofxGroupGui;
+class ofxGuiGroup;
 
-class ofxPanel : public ofxGroupGui {
+class ofxPanel : public ofxGuiGroup {
 public:
 	ofxPanel();
 	ofxPanel(const ofParameterGroup & parameters, const std::string& filename=ofxPanelDefaultFilename, float x = 10, float y = 10);
@@ -30,7 +31,7 @@ protected:
 	void loadIcons();
 private:
 	ofRectangle loadBox, saveBox;
-	static ofImage loadIcon, saveIcon;
+	ofImage loadIcon, saveIcon;
     
     ofPoint grabPt;
 	bool bGrabbed;

@@ -4,6 +4,8 @@
 #include "ofAppRunner.h"
 #include "RtAudio.h"
 
+using namespace std;
+
 //------------------------------------------------------------------------------
 RtAudio::Api toRtAudio(ofSoundDevice::Api api){
 	switch (api) {
@@ -170,6 +172,8 @@ bool ofRtAudioSoundStream::setup(const ofSoundStreamSettings & settings_)
 	options.priority = 1;
 	outputBuffer.setDeviceID(outputParameters.deviceId);
 	inputBuffer.setDeviceID(inputParameters.deviceId);
+	outputBuffer.setSampleRate(settings.sampleRate);
+	inputBuffer.setSampleRate(settings.sampleRate);
 	unsigned int bufferSize = settings.bufferSize;
 	try {
 		audio->openStream((settings.numOutputChannels > 0) ? &outputParameters : nullptr, (settings.numInputChannels > 0) ? &inputParameters : nullptr, RTAUDIO_FLOAT32,

@@ -10,6 +10,8 @@
 #include "ofLog.h"
 #include <limits>
 
+using namespace std;
+
 #if !defined(TARGET_ANDROID) && !defined(TARGET_IPHONE) && !defined(TARGET_LINUX_ARM)
 ofSoundBuffer::InterpolationAlgorithm ofSoundBuffer::defaultAlgorithm = ofSoundBuffer::Hermite;
 #else
@@ -33,7 +35,7 @@ ofSoundBuffer::ofSoundBuffer(short * shortBuffer, std::size_t numFrames, std::si
 
 void ofSoundBuffer::copyFrom(const short * shortBuffer, std::size_t numFrames, std::size_t numChannels, unsigned int sampleRate) {
 	this->channels = numChannels;
-	this->samplerate = sampleRate;
+	setSampleRate(samplerate);
 	buffer.resize(numFrames * numChannels);
 	for(std::size_t i = 0; i < size(); i++){
 		buffer[i] = shortBuffer[i]/float(numeric_limits<short>::max());
@@ -43,7 +45,7 @@ void ofSoundBuffer::copyFrom(const short * shortBuffer, std::size_t numFrames, s
 
 void ofSoundBuffer::copyFrom(const float * floatBuffer, std::size_t numFrames, std::size_t numChannels, unsigned int sampleRate) {
 	this->channels = numChannels;
-	this->samplerate = sampleRate;
+	setSampleRate(samplerate);
 	buffer.assign(floatBuffer, floatBuffer + (numFrames * numChannels));
 	checkSizeAndChannelsConsistency("copyFrom");
 }
@@ -498,7 +500,7 @@ void ofSoundBuffer::getChannel(ofSoundBuffer & targetBuffer, std::size_t sourceC
 	targetBuffer.setNumChannels(1);
 	targetBuffer.setSampleRate(samplerate);
 	if(channels == 1){
-		copyTo(targetBuffer, getNumFrames(), 1, 0);
+		copyTo(targetBuffer, getNumFrames(), 0, 0);
 	}else{
 		// fetch samples from only one channel
 		targetBuffer.resize(getNumFrames());
@@ -515,7 +517,7 @@ void ofSoundBuffer::setChannel(const ofSoundBuffer & inBuffer, std::size_t targe
 	resize(inBuffer.getNumFrames() * channels);
 	// copy from inBuffer to targetChannel
 	float * bufferPtr = &this->buffer[targetChannel];
-	const float * inBufferPtr = &(inBuffer[targetChannel]);
+	const float * inBufferPtr = &(inBuffer[0]);
 	for(std::size_t i = 0; i < getNumFrames(); i++){
 		*bufferPtr = *inBufferPtr;
 		bufferPtr += channels;

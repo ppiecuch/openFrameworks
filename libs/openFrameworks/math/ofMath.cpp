@@ -5,9 +5,14 @@
 #ifndef TARGET_WIN32
 	#include <sys/time.h>
 #endif
+#ifdef TARGET_QT
+    #include <QThread>
+#endif
 
 #include "ofNoise.h"
 #include "ofPolyline.h"
+
+using namespace std;
 
 //--------------------------------------------------
 int ofNextPow2(int a){
@@ -29,7 +34,11 @@ void ofSeedRandom() {
 		// use XOR'd second, microsecond precision AND pid as seed
 		struct timeval tv;
 		gettimeofday(&tv, 0);
+    # ifdef TARGET_QT
+		long int n = (tv.tv_sec ^ tv.tv_usec) ^ QThread::currentThreadId();
+    # else
 		long int n = (tv.tv_sec ^ tv.tv_usec) ^ getpid();
+    # endif
 		srand(n);
 	#else
 		struct timeval tv;

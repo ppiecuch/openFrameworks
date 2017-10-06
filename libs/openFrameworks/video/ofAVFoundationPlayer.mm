@@ -50,17 +50,17 @@ ofAVFoundationPlayer& ofAVFoundationPlayer::operator=(ofAVFoundationPlayer other
 }
 
 //--------------------------------------------------------------
-void ofAVFoundationPlayer::loadAsync(string name){
+void ofAVFoundationPlayer::loadAsync(std::string name){
     loadPlayer(name, true);
 }
 
 //--------------------------------------------------------------
-bool ofAVFoundationPlayer::load(string name) {
+bool ofAVFoundationPlayer::load(std::string name) {
     return loadPlayer(name, false);
 }
 
 //--------------------------------------------------------------
-bool ofAVFoundationPlayer::loadPlayer(string name, bool bAsync) {
+bool ofAVFoundationPlayer::loadPlayer(std::string name, bool bAsync) {
 	if( ofGetUsingArbTex() == false ){
         killTextureCache();
 		bUseTextureCache = false;
@@ -89,13 +89,13 @@ bool ofAVFoundationPlayer::loadPlayer(string name, bool bAsync) {
 	
 	bool bLoaded = false;
 	
-    if(videoPlayer == nullptr) {
+	if(videoPlayer == nullptr) {
 		// create a new player if its not allocated
 		videoPlayer = [[ofAVFoundationVideoPlayer alloc] init];
 		[videoPlayer setWillBeUpdatedExternally:YES];
 	}
 	
-	bLoaded = [videoPlayer loadWithURL:url async:bAsync];
+	bLoaded = [videoPlayer loadWithURL:url async:bAsync stream:bStream];
 
 	pixels.clear();
 	videoTexture.clear();
@@ -770,7 +770,7 @@ void * ofAVFoundationPlayer::getAVFoundationVideoPlayer() {
 #endif
 
 //-------------------------------------------------------------- DEPRECATED.
-bool ofAVFoundationPlayer::loadMovie(string name) {
+bool ofAVFoundationPlayer::loadMovie(std::string name) {
     return load(name);
 }
 

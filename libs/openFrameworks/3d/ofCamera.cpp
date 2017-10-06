@@ -1,6 +1,8 @@
 #include "ofCamera.h"
 #include "ofLog.h"
 
+using namespace std;
+
 //----------------------------------------
 ofCamera::ofCamera() :
 isOrtho(false),
@@ -154,7 +156,7 @@ glm::mat4 ofCamera::getProjectionMatrix(ofRectangle viewport) const {
 	}else{
 		float aspect = forceAspectRatio ? aspectRatio : viewport.width/viewport.height;
 		auto projection = glm::perspective(ofDegToRad(fov), aspect, nearClip, farClip);
-		projection = glm::translate(projection, {-lensOffset.x, -lensOffset.y, 0.f});
+		projection = glm::translate(glm::mat4(), {-lensOffset.x, -lensOffset.y, 0.f}) * projection;
 		return projection;
 	}
 }
@@ -249,4 +251,57 @@ shared_ptr<ofBaseRenderer> ofCamera::getRenderer() const{
 
 void ofCamera::setRenderer(shared_ptr<ofBaseRenderer> _renderer){
 	renderer = _renderer;
+}
+
+void ofCamera::drawFrustum() {
+	ofPushMatrix(); // we assume we are currently in world space.
+	ofMultMatrix( getGlobalTransformMatrix() ); 
+	// Move origin to camera origin == global transform of camera == inverse (view matrix)
+	// Which brings us into view space
+
+
+	// We want to draw the frustum of camera 0. To this end, we grab the matrix which transforms
+	// from view space into clip space (i.e. the projection matrix),
+	// then we take our unit clip cube (i.e. the cube that delimits clip space,
+	// and is defined to be +-1 onto each x, y , z),and transform this clip cube back 
+	// into view space. We transform it back into
+	// viewspace by applying the inverse transform viewspace -> clipspace
+	// which is the inverse of applying the projection matrix, which is applying
+	// the inverse projection matrix.
+
+	// the edges of our unit cube in clip space:
+
+	ofVec3f clipCube[8] = {
+		ofVec3f( -1,-1,-1 ), ofVec3f( -1, 1,-1 ), ofVec3f( 1,-1,-1 ), ofVec3f( 1, 1,-1 ),
+		ofVec3f( -1,-1, 1 ), ofVec3f( -1, 1, 1 ), ofVec3f( 1,-1, 1 ), ofVec3f( 1, 1, 1 ),
+	};
+	// since the clip cube is expressed in clip (=projection) space, we want this 
+	// transformed back into our current space, view space, i.e. apply the inverse 
+	// projection matrix to it.
+
+
+	// calculate projection matrix using frustum: 
+
+	ofMatrix4x4 projectionMatrixInverse = glm::inverse( getProjectionMatrix() );
+
+	for ( int i = 0; i < 8; i++ ) {
+		clipCube[i] = clipCube[i] * projectionMatrixInverse;
+	}
+
+
+	// now draw our clip cube side edge rays - note that since the coordinates are
+	// now in world space, we can draw them without applying any additional trans-
+	// formations.
+	for ( int i = 0; i < 4; i++ ) {
+		ofDrawLine( clipCube[i], clipCube[i + 4] );
+	}
+
+	ofPushStyle();
+	ofNoFill();
+	//// draw the clip cube cap
+	ofDrawRectangle( clipCube[0], clipCube[3].x - clipCube[0].x, clipCube[3].y - clipCube[0].y );
+	ofDrawRectangle( clipCube[4], clipCube[7].x - clipCube[4].x, clipCube[7].y - clipCube[4].y );
+	ofPopStyle();
+
+	ofPopMatrix();
 }

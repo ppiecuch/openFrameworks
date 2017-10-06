@@ -5,6 +5,8 @@
 
 #include "ofConstants.h"
 
+using namespace std;
+
 #if !defined(TARGET_IMPLEMENTS_URL_LOADER)
 	#include <curl/curl.h>
 	#include "ofThreadChannel.h"
@@ -514,11 +516,11 @@ int ofLoadURLAsync(const string&  url, const string&  name){
 	return getFileLoader().getAsync(url,name);
 }
 
-ofHttpResponse ofSaveURLTo(const string& url, const string& path){
+ofHttpResponse ofSaveURLTo(const string& url, const std::filesystem::path& path){
 	return getFileLoader().saveTo(url,path);
 }
 
-int ofSaveURLAsync(const string& url, const string& path){
+int ofSaveURLAsync(const string& url, const std::filesystem::path& path){
 	return getFileLoader().saveAsync(url,path);
 }
 

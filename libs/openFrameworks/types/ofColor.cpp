@@ -237,23 +237,6 @@ void ofColor_<PixelType>::set(const ofColor_<PixelType>& color){
 	a = color.a;
 }
 
-
-template<>
-void ofColor_<unsigned char>::setHex(int hexColor, float alpha){
-	r = (hexColor >> 16) & 0xff;
-	g = (hexColor >> 8) & 0xff;
-	b = (hexColor >> 0) & 0xff;
-	a = alpha;
-}
-
-template<typename PixelType>
-void ofColor_<PixelType>::setHex (int hexColor, float alpha){
-	ofColor c = ofColor::fromHex(hexColor);
-	*this = c;
-	a = alpha;
-}
-
-
 template<typename PixelType>
 ofColor_<PixelType>& ofColor_<PixelType>::clamp(){
 	r = CLAMP(r, 0.0f, limit());
@@ -486,20 +469,6 @@ void ofColor_<PixelType>::setHsb(float hue, float saturation, float brightness, 
     // finally assign the alpha
     a = alpha;
 }
-
-template<>
-int ofColor_<unsigned char>::getHex() const {
-	return
-		((0xff & (unsigned char) r) << 16) |
-		((0xff & (unsigned char) g) << 8) |
-		((0xff & (unsigned char) b));
-}
-
-template<typename PixelType>
-int ofColor_<PixelType>::getHex() const {
-	return ((ofColor) *this).getHex();
-}
-
 
 template<typename PixelType>
 ofColor_<PixelType> & ofColor_<PixelType>::operator = (float val){

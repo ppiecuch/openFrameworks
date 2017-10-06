@@ -1,10 +1,11 @@
 #pragma once
 
-#include "ofxGroupGui.h"
+#include "ofxGuiGroup.h"
 #include "ofxSlider.h"
+#include "ofxColorPicker.h"
 
 template<class VecType>
-class ofxVecSlider_ : public ofxGroupGui {
+class ofxVecSlider_ : public ofxGuiGroup {
 public:
     ofxVecSlider_(){
         sliderChanging = false;
@@ -33,7 +34,7 @@ typedef ofxVecSlider_<ofDefaultVec4> ofxVec4Slider;
 typedef ofxVecSlider_<ofVec3f> ofxPointSlider;
 
 template<typename ColorType>
-class ofxColorSlider_: public ofxGroupGui{
+class ofxColorSlider_: public ofxGuiGroup{
 
 public:
 	ofxColorSlider_(){
@@ -49,10 +50,14 @@ public:
 	ofColor_<ColorType> operator=(const ofColor_<ColorType> & v);
 	operator const ofColor_<ColorType> & ();
 protected:
+	void onMinimize();
+	void onMaximize();
     void changeSlider(const void * parameter, ColorType & value);
-    void changeValue(ofColor_<ColorType> & value);
-    ofParameter<ofColor_<ColorType> > value;
+	void changeValue(ofColor_<ColorType> & value);
     bool sliderChanging;
+	ofColor originalHeaderBackground;
+	ofColor originalHeaderText;
+	ofxColorPicker_<ColorType> picker;
 };
 
 typedef ofxColorSlider_<unsigned char> ofxColorSlider;

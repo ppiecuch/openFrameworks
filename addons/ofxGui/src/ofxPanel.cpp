@@ -10,18 +10,13 @@
 #include "ofImage.h"
 using namespace std;
 
-ofImage ofxPanel::loadIcon;
-ofImage ofxPanel::saveIcon;
-
 ofxPanel::ofxPanel()
 :bGrabbed(false){}
 
 ofxPanel::ofxPanel(const ofParameterGroup & parameters, const std::string& filename, float x, float y)
-: ofxGroupGui(parameters, filename, x, y)
+: ofxGuiGroup(parameters, filename, x, y)
 , bGrabbed(false){
-	if(!loadIcon.isAllocated() || !saveIcon.isAllocated()){
-		loadIcons();
-	}
+	loadIcons();
 	registerMouseEvents();
 	setNeedsRedraw();
 }
@@ -31,19 +26,15 @@ ofxPanel::~ofxPanel(){
 }
 
 ofxPanel * ofxPanel::setup(const std::string& collectionName, const std::string& filename, float x, float y){
-	if(!loadIcon.isAllocated() || !saveIcon.isAllocated()){
-		loadIcons();
-	}
+	loadIcons();
 	registerMouseEvents();
-	return (ofxPanel*)ofxGroupGui::setup(collectionName,filename,x,y);
+	return (ofxPanel*)ofxGuiGroup::setup(collectionName,filename,x,y);
 }
 
 ofxPanel * ofxPanel::setup(const ofParameterGroup & parameters, const std::string& filename, float x, float y){
-	if(!loadIcon.isAllocated() || !saveIcon.isAllocated()){
-		loadIcons();
-	}
+	loadIcons();
 	registerMouseEvents();
-	return (ofxPanel*)ofxGroupGui::setup(parameters,filename,x,y);
+	return (ofxPanel*)ofxGuiGroup::setup(parameters,filename,x,y);
 }
 
 void ofxPanel::loadIcons(){
@@ -120,7 +111,7 @@ void ofxPanel::render(){
 
 bool ofxPanel::mouseReleased(ofMouseEventArgs & args){
     this->bGrabbed = false;
-    if(ofxGroupGui::mouseReleased(args)) return true;
+    if(ofxGuiGroup::mouseReleased(args)) return true;
     if(isGuiDrawing() && b.inside(ofPoint(args.x,args.y))){
     	return true;
     }else{
@@ -147,13 +138,15 @@ bool ofxPanel::setValue(float mx, float my, bool bCheck){
 			}
 
 			if(loadBox.inside(mx, my)) {
-				loadFromFile(filename);
-				ofNotifyEvent(loadPressedE,this);
+				if(!ofNotifyEvent(loadPressedE,this)){
+					loadFromFile(filename);
+				}
 				return true;
 			}
 			if(saveBox.inside(mx, my)) {
-				saveToFile(filename);
-				ofNotifyEvent(savePressedE,this);
+				if(!ofNotifyEvent(savePressedE,this)){
+					saveToFile(filename);
+				}
 				return true;
 			}
 		}

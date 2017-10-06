@@ -17,12 +17,12 @@ class ofCoreEvents;
 
 void ofInit();
 void ofSetupOpenGL(int w, int h, ofWindowMode screenMode);	// sets up the opengl context!
-shared_ptr<ofAppBaseWindow> ofCreateWindow(const ofWindowSettings & settings);	// sets up the opengl context!
-shared_ptr<ofMainLoop> ofGetMainLoop();
-void ofSetMainLoop(shared_ptr<ofMainLoop> mainLoop);
+std::shared_ptr<ofAppBaseWindow> ofCreateWindow(const ofWindowSettings & settings);	// sets up the opengl context!
+std::shared_ptr<ofMainLoop> ofGetMainLoop();
+void ofSetMainLoop(std::shared_ptr<ofMainLoop> mainLoop);
 
 template<typename Window>
-void ofSetupOpenGL(shared_ptr<Window> windowPtr, int w, int h, ofWindowMode screenMode){
+void ofSetupOpenGL(std::shared_ptr<Window> windowPtr, int w, int h, ofWindowMode screenMode){
 	ofInit();
 	ofWindowSettings settings;
 	settings.width = w;
@@ -34,21 +34,21 @@ void ofSetupOpenGL(shared_ptr<Window> windowPtr, int w, int h, ofWindowMode scre
 
 //special case so we preserve supplied settngs
 //TODO: remove me when we remove the ofSetupOpenGL legacy approach.
-void ofSetupOpenGL(shared_ptr<ofAppGLFWWindow> windowPtr, int w, int h, ofWindowMode screenMode);
+void ofSetupOpenGL(std::shared_ptr<ofAppGLFWWindow> windowPtr, int w, int h, ofWindowMode screenMode);
 
 template<typename Window>
 static void noopDeleter(Window*){}
 
 template<typename Window>
 void ofSetupOpenGL(Window * windowPtr, int w, int h, ofWindowMode screenMode){
-	shared_ptr<Window> window = shared_ptr<Window>(windowPtr,std::ptr_fun(noopDeleter<Window>));
+	std::shared_ptr<Window> window = std::shared_ptr<Window>(windowPtr,std::ptr_fun(noopDeleter<Window>));
 	ofSetupOpenGL(window,w,h,screenMode);
 }
 
 
-int ofRunApp(shared_ptr<ofBaseApp> && OFSA);
+int ofRunApp(std::shared_ptr<ofBaseApp> && OFSA);
 int ofRunApp(ofBaseApp * OFSA = nullptr); // will be deprecated
-void ofRunApp(shared_ptr<ofAppBaseWindow> window, shared_ptr<ofBaseApp> && app);
+void ofRunApp(std::shared_ptr<ofAppBaseWindow> window, std::shared_ptr<ofBaseApp> && app);
 int ofRunMainLoop();
 
 
@@ -62,6 +62,10 @@ float 		ofGetTargetFrameRate();
 uint64_t	ofGetFrameNum();
 void 		ofSetFrameRate(int targetRate);
 double		ofGetLastFrameTime();
+void		ofSetTimeModeSystem();
+uint64_t	ofGetFixedStepForFps(double fps);
+void		ofSetTimeModeFixedRate(uint64_t stepNanos = ofGetFixedStepForFps(60)); //default nanos for 1 frame at 60fps
+void		ofSetTimeModeFiltered(float alpha = 0.9);
 
 void		ofSetOrientation(ofOrientation orientation, bool vFlip=true);
 ofOrientation			ofGetOrientation();
@@ -80,6 +84,9 @@ int 		ofGetHeight();
 int 		ofGetWindowWidth();			// ofGetWindowWidth is correct for actual window coordinates - so doesn't change with orientation.
 int 		ofGetWindowHeight();
 
+std::string ofGetClipboardString();
+void		ofSetClipboardString(const std::string & str);
+
 /// \returns a random number between 0 and the width of the window.
 float ofRandomWidth();
 
@@ -93,7 +100,7 @@ std::shared_ptr<ofAppBaseWindow> ofGetCurrentWindow();
 
 void 		ofSetWindowPosition(int x, int y);
 void 		ofSetWindowShape(int width, int height);
-void 		ofSetWindowTitle(string title);
+void 		ofSetWindowTitle(std::string title);
 void		ofEnableSetupScreen();
 void		ofDisableSetupScreen();
 void		ofSetFullscreen(bool fullscreen);
@@ -102,13 +109,12 @@ void		ofToggleFullscreen();
 void 		ofSetVerticalSync(bool bSync);
 
 ofCoreEvents & ofEvents();
-void ofSetCurrentRenderer(shared_ptr<ofBaseRenderer> renderer,bool setDefaults=false);
-shared_ptr<ofBaseRenderer> & ofGetCurrentRenderer();
+void ofSetCurrentRenderer(std::shared_ptr<ofBaseRenderer> renderer,bool setDefaults=false);
+std::shared_ptr<ofBaseRenderer> & ofGetCurrentRenderer();
 void ofSetEscapeQuitsApp(bool bQuitOnEsc);
 
 //-------------------------- native window handles
 #if defined(TARGET_LINUX) && !defined(TARGET_RASPBERRY_PI)
-#include <X11/Xlib.h>
 Display* ofGetX11Display();
 Window  ofGetX11Window();
 #endif
