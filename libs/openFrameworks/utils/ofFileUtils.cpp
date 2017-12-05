@@ -8,8 +8,12 @@
 
 
 #ifdef TARGET_OSX
-	#include <mach-o/dyld.h>       /* _NSGetExecutablePath */
+	#include <mach-o/dyld.h>   /* _NSGetExecutablePath */
 	#include <limits.h>        /* PATH_MAX */
+#endif
+
+#ifdef TARGET_QT
+    #include <QFileInfo>
 #endif
 
 using namespace std;
@@ -632,8 +636,9 @@ string ofFile::getAbsolutePath() const {
 
 //------------------------------------------------------------------------------------------------------------
 bool ofFile::canRead() const {
-	auto perm = std::filesystem::status(myFile).permissions();
-#ifdef TARGET_WIN32
+#if defined(TARGET_QT)
+    return QFileInfo(myFile.string().c_str()).isReadable();
+#elif defined(TARGET_WIN32)
 	DWORD attr = GetFileAttributes(myFile.native().c_str());
 	if (attr == INVALID_FILE_ATTRIBUTES)
 	{
@@ -641,6 +646,7 @@ bool ofFile::canRead() const {
 	}
 	return true;
 #else
+	auto perm = std::filesystem::status(myFile).permissions();
 	struct stat info;
 	stat(path().c_str(), &info);  // Error check omitted
 	if(geteuid() == info.st_uid){
@@ -655,7 +661,9 @@ bool ofFile::canRead() const {
 
 //------------------------------------------------------------------------------------------------------------
 bool ofFile::canWrite() const {
-#ifdef TARGET_WIN32
+#if defined(TARGET_QT)
+    return QFileInfo(myFile.string().c_str()).isWritable();
+#elif defined(TARGET_WIN32)
 	DWORD attr = GetFileAttributes(myFile.native().c_str());
 	if (attr == INVALID_FILE_ATTRIBUTES){
 		return false;
@@ -678,10 +686,12 @@ bool ofFile::canWrite() const {
 
 //------------------------------------------------------------------------------------------------------------
 bool ofFile::canExecute() const {
-	auto perm = std::filesystem::status(myFile).permissions();
-#ifdef TARGET_WIN32
+#if defined(TARGET_QT)
+    return QFileInfo(myFile.string().c_str()).isExecutable();
+#elif defined(TARGET_WIN32)
 	return getExtension() == "exe";
 #else
+    auto perm = std::filesystem::status(myFile).permissions();
 	struct stat info;
 	stat(path().c_str(), &info);  // Error check omitted
 	if(geteuid() == info.st_uid){
@@ -711,7 +721,9 @@ bool ofFile::isDirectory() const {
 
 //------------------------------------------------------------------------------------------------------------
 bool ofFile::isDevice() const {
-#ifdef TARGET_WIN32
+#if defined(TARGET_QT)
+	return false;
+#elif defied(TARGET_WIN32)
 	return false;
 #else
 	return std::filesystem::status(myFile).type() == std::filesystem::block_file;
@@ -720,7 +732,7 @@ bool ofFile::isDevice() const {
 
 //------------------------------------------------------------------------------------------------------------
 bool ofFile::isHidden() const {
-#ifdef TARGET_WIN32
+#ifndef TARGET_WIN32
 	return false;
 #else
 	return myFile.filename() != "." && myFile.filename() != ".." && myFile.filename().string()[0] == '.';
@@ -729,6 +741,13 @@ bool ofFile::isHidden() const {
 
 //------------------------------------------------------------------------------------------------------------
 void ofFile::setWriteable(bool flag){
+#if defined(TARGET_QT)
+    QFile qf(myFile.c_str());
+    if(flag)
+        qf.setPermissions(qf.permissions()|QFileDevice::WriteOwner);
+    else
+        qf.setPermissions(qf.permissions()&~QFileDevice::WriteOwner);
+#else
 	try{
 		if(flag){
 			std::filesystem::permissions(myFile,std::filesystem::perms::owner_write | std::filesystem::perms::add_perms);
@@ -738,6 +757,7 @@ void ofFile::setWriteable(bool flag){
 	}catch(std::exception & e){
 		ofLogError() << "Couldn't set write permission on " << myFile << ": " << e.what();
 	}
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -748,6 +768,13 @@ void ofFile::setReadOnly(bool flag){
 
 //------------------------------------------------------------------------------------------------------------
 void ofFile::setReadable(bool flag){
+#if defined(TARGET_QT)
+    QFile qf(myFile.c_str());
+    if(flag)
+        qf.setPermissions(qf.permissions()|QFileDevice::ReadOwner);
+    else
+        qf.setPermissions(qf.permissions()&~QFileDevice::ReadOwner);
+#else
 	try{
 		if(flag){
 			std::filesystem::permissions(myFile,std::filesystem::perms::owner_read | std::filesystem::perms::add_perms);
@@ -757,10 +784,18 @@ void ofFile::setReadable(bool flag){
 	}catch(std::exception & e){
 		ofLogError() << "Couldn't set read permission on " << myFile << ": " << e.what();
 	}
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------------
 void ofFile::setExecutable(bool flag){
+#if defined(TARGET_QT)
+    QFile qf(myFile.c_str());
+    if(flag)
+        qf.setPermissions(qf.permissions()|QFileDevice::ExeOwner);
+    else
+        qf.setPermissions(qf.permissions()&~QFileDevice::ExeOwner);
+#else
 	try{
 		if(flag){
 			std::filesystem::permissions(myFile, std::filesystem::perms::owner_exe | std::filesystem::perms::add_perms);
@@ -770,6 +805,7 @@ void ofFile::setExecutable(bool flag){
 	}catch(std::exception & e){
 		ofLogError() << "Couldn't set executable permission on " << myFile << ": " << e.what();
 	}
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------------

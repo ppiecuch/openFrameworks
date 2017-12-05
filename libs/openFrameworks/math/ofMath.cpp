@@ -35,7 +35,7 @@ void ofSeedRandom() {
 		struct timeval tv;
 		gettimeofday(&tv, 0);
     # ifdef TARGET_QT
-		long int n = (tv.tv_sec ^ tv.tv_usec) ^ QThread::currentThreadId();
+		long int n = (tv.tv_sec ^ tv.tv_usec) ^ long(QThread::currentThreadId());
     # else
 		long int n = (tv.tv_sec ^ tv.tv_usec) ^ getpid();
     # endif

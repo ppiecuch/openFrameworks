@@ -113,6 +113,8 @@ enum ofTargetPlatform{
         #define TARGET_OPENGLES
     #endif
 	#define TARGET_IMPLEMENTS_URL_LOADER
+    #include <QFile>
+    #include <QFileInfo>
 #elif defined( __WIN32__ ) || defined( _WIN32 )
 	#define TARGET_WIN32
 #elif defined( __APPLE_CC__)
@@ -163,7 +165,35 @@ namespace std { namespace filesystem {
         path(const std::string s) : std::string(s) { }
         path(const char *p) : std::string(p) { }
         std::string string() const { return *this; }
+        const char* c_str() const { return this->c_str(); }
+        path extension() const { return path(QFileInfo(string().c_str()).completeSuffix().toStdString()); }
+        path filename() const { return path(QFileInfo(string().c_str()).fileName().toStdString()); }
+        path stem() const {  return path(QFileInfo(string().c_str()).baseName().toStdString()); }
     };
+    size_t file_size(const path &p) { return QFile::exists(p.string().c_str()); }
+    bool exists(const path &p) { return QFile::exists(p.string().c_str()); }
+    path current_path() {}
+    bool copy_file(const path& from, const path& to) {}
+    bool rename(const path& old_p, const path& new_p) {}
+    bool remove(const path& p) {}
+    bool remove_all(const path& p) {}
+    bool create_directories(const path& p) {}
+    bool create_directory(const path& p) {}
+    path canonical(const path& p, const path& base = current_path()) {}
+    path absolute(const path& p, const path& base = current_path()) {}
+    bool is_regular_file(const path &p) { QFileInfo(p.string().c_str()); }
+	bool is_symlink(const path &p) { QFileInfo(p.string().c_str()); }
+	bool is_directory(const path &p) { QFileInfo(p.string().c_str()); }
+    struct status_info {
+        status_info(long uid, long gid, int perm) : st_uid(uid), st_gid(gid), st_perm(perm) {}
+        QFile::Permissions permissions() const { return st_perm; };
+        long st_uid, st_gid;
+        QFile::Permissions st_perm;
+    };
+    status_info status(const path &p) {
+        QFile::Permissions pm = QFileInfo(p.string().c_str()).permissions();
+        return status_info(0, 0, pm);
+    }
 } }
 #endif
 
