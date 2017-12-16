@@ -113,8 +113,12 @@ enum ofTargetPlatform{
         #define TARGET_OPENGLES
     #endif
 	#define TARGET_IMPLEMENTS_URL_LOADER
+    #include <QDateTime>
     #include <QFile>
     #include <QFileInfo>
+    #include <QDirIterator>
+    #include <QMutex>
+    #include <QWaitCondition>
 #elif defined( __WIN32__ ) || defined( _WIN32 )
 	#define TARGET_WIN32
 #elif defined( __APPLE_CC__)
@@ -159,20 +163,51 @@ enum ofTargetPlatform{
 
 // use Qt implementation insted of external dependencies:
 #ifdef TARGET_QT
+class SleepSimulator {
+	QMutex localMutex;
+	QWaitCondition sleepSimulator;
+public:
+	SleepSimulator() { localMutex.lock(); }
+	void sleep(unsigned long sleepMS) { sleepSimulator.wait(&localMutex, sleepMS); }
+	void CancelSleep() { sleepSimulator.wakeAll(); }
+};
+
 namespace std { namespace filesystem {
     struct path : public std::string {
         path() : std::string() { }
         path(const std::string s) : std::string(s) { }
         path(const char *p) : std::string(p) { }
         std::string string() const { return *this; }
+        std::string generic_string() const { return string(); }
         const char* c_str() const { return this->c_str(); }
         path extension() const { return path(QFileInfo(string().c_str()).completeSuffix().toStdString()); }
         path filename() const { return path(QFileInfo(string().c_str()).fileName().toStdString()); }
-        path stem() const {  return path(QFileInfo(string().c_str()).baseName().toStdString()); }
+        path stem() const { return path(QFileInfo(string().c_str()).baseName().toStdString()); }
+        path & operator /= (const path & p) {
+            if ( ! p.empty() ) {
+                if (this->empty()) {
+                    *this = p;
+                } else {
+                    const auto sep = QDir::separator().toLatin1();
+                    if (*this->string().rbegin() != sep)
+                        *this += sep;
+                    if (*p.string().begin() == sep)
+                        *this += p.substr(1);
+                    else
+                        *this += p;
+                }
+            }
+            return *this;
+        }
+        path make_preferred() const {  return path( QDir::toNativeSeparators(string().c_str()).toStdString() ); }
+        path parent_path() { path(QFileInfo(string().c_str()).dir().path().toStdString()); }
+        bool is_absolute() const { return QFileInfo(string().c_str()).isAbsolute(); }
     };
+    qint64 last_write_time(const path &p) { return QFileInfo(string().c_str()).lastModified().toSecsSinceEpoch(); }
     size_t file_size(const path &p) { return QFile::exists(p.string().c_str()); }
     bool exists(const path &p) { return QFile::exists(p.string().c_str()); }
-    path current_path() {}
+    path current_path() { return path( QDir::currentPath().toStdString() ); }
+    void current_path(const path &p) { QDir::setCurrent(p.string().c_str()); }
     bool copy_file(const path& from, const path& to) {}
     bool rename(const path& old_p, const path& new_p) {}
     bool remove(const path& p) {}
@@ -193,6 +228,29 @@ namespace std { namespace filesystem {
     status_info status(const path &p) {
         QFile::Permissions pm = QFileInfo(p.string().c_str()).permissions();
         return status_info(0, 0, pm);
+    };
+    struct directory_entry {
+        directory_entry() {}
+        directory_entry(const std::string &p) : entry(p) {}
+        const std::filesystem::path path() const { return entry; }
+        std::filesystem::path entry;
+    };
+    struct directory_iterator : public QDirIterator {
+        directory_iterator() : QDirIterator("") {}
+        directory_iterator(const std::filesystem::path &p) : QDirIterator(p.c_str()), entry(filePath().toStdString()) {}
+        const directory_entry *operator ->() { return &entry; }
+        bool operator == (const directory_iterator & other) const {
+            return (entry.path().empty() && other.entry.path().empty());
+        }
+        bool operator != (const directory_iterator & other) const { return !(*this == other); }
+        void operator ++() { entry = next().toStdString(); }
+        directory_entry entry;
+    };
+    inline path operator / (const path & lhs, const path & rhs)
+    {
+        path p(lhs);
+        p /= rhs;
+        return p;
     }
 } }
 #endif
