@@ -385,7 +385,10 @@ unsigned int ofGetUnixTime(){
 
 //--------------------------------------
 void ofSleepMillis(int millis){
-	#ifdef TARGET_WIN32
+	#ifdef TARGET_QT
+        SleepSimulator s;
+        s.sleep(millis);
+	#elif defined(TARGET_WIN32)
 		Sleep(millis);
 	#elif defined(TARGET_LINUX)
 		timespec interval = {millis/1000, millis%1000*1000000};

@@ -7,48 +7,12 @@
 //
 
 #include "ofxInputField.h"
-
+#include "ofxCommon.inl"
 #include "ofGraphics.h"
 
 using namespace std;
 
 namespace{
-	template<typename Type>
-	typename std::enable_if<std::is_integral<Type>::value, Type>::type
-	getRange(Type min, Type max, float width){
-		double range = max - min;
-		range /= width*4;
-		return std::max(range,1.0);
-	}
-
-	template<typename Type>
-	typename std::enable_if<std::is_floating_point<Type>::value, Type>::type
-	getRange(Type min, Type max, float width){
-		double range = max - min;
-		range /= width*4;
-		return range;
-	}
-
-	template<typename Type>
-	std::string toString(Type t){
-		return ofToString(t);
-	}
-
-	template<>
-	std::string toString(uint8_t t){
-		return ofToString((int) t);
-	}
-
-	template<>
-	std::string toString(int8_t t){
-		return ofToString((int) t);
-	}
-
-	template<>
-	std::string toString(std::string t){
-		return t;
-	}
-
 	bool isHexNotation(std::string const& s){
 	  return s.compare(0, 2, "0x") == 0
 		  && s.size() > 2

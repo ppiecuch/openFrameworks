@@ -12,9 +12,38 @@
 #ifndef GL_DEBUG_OUTPUT
 #define GL_DEBUG_OUTPUT                   0x92E0
 #endif
+#ifndef GL_DEBUG_TYPE_ERROR
+#define GL_DEBUG_TYPE_ERROR               0x824C
+#endif
+#ifndef GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR
+#define GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR 0x824D
+#endif
+#ifndef GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR
+#define GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR  0x824E
+#endif
+#ifndef GL_DEBUG_TYPE_PORTABILITY
+#define GL_DEBUG_TYPE_PORTABILITY         0x824F
+#endif
+#ifndef GL_DEBUG_TYPE_PERFORMANCE
+#define GL_DEBUG_TYPE_PERFORMANCE         0x8250
+#endif
+#ifndef GL_DEBUG_TYPE_OTHER
+#define GL_DEBUG_TYPE_OTHER               0x8251
+#endif
+#ifndef GL_DEBUG_SEVERITY_MEDIUM
+#define GL_DEBUG_SEVERITY_MEDIUM          0x9147
+#endif
+#ifndef GL_DEBUG_SEVERITY_HIGH
+#define GL_DEBUG_SEVERITY_HIGH            0x9146
+#endif
+#ifndef GL_DEBUG_SEVERITY_LOW
+#define GL_DEBUG_SEVERITY_LOW             0x9148
+#endif
 
 #ifdef TARGET_QT
-#include <qopenglcontext.h>
+# include <qopenglext.h>
+# include <qopenglcontext.h>
+# include <qopengldebug.h>
 #endif
 
 using namespace std;

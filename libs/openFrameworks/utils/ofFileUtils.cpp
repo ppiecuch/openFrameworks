@@ -1708,7 +1708,9 @@ string ofFilePath::getCurrentExeDir(){
 
 //------------------------------------------------------------------------------------------------------------
 string ofFilePath::getUserHomeDir(){
-	#ifdef TARGET_WIN32
+	#ifdef TARGET_QT
+        return QDir::homePath().toStdString();
+	#elif defined(TARGET_WIN32)
 		// getenv will return any Environent Variable on Windows
 		// USERPROFILE is the key on Windows 7 but it might be HOME
 		// in other flavours of windows...need to check XP and NT...
@@ -1722,6 +1724,9 @@ string ofFilePath::getUserHomeDir(){
 }
 
 string ofFilePath::makeRelative(const std::filesystem::path & from, const std::filesystem::path & to){
+#ifdef TARGET_QT
+    return QDir(from.string().c_str()).relativeFilePath(to.string().c_str()).toStdString();
+#else
 	auto pathFrom = std::filesystem::absolute( from );
 	auto pathTo = std::filesystem::absolute( to );
 	std::filesystem::path ret;
@@ -1742,4 +1747,5 @@ string ofFilePath::makeRelative(const std::filesystem::path & from, const std::f
 	}
 
 	return ret.string();
+#endif
 }
