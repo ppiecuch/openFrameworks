@@ -5,9 +5,12 @@
 #include "ofGLProgrammableRenderer.h"
 #include "ofGraphics.h"
 #include "ofShader.h"
-#include "ofBaseTypes.h"
+#include "ofGraphicsBaseTypes.h"
 #include "ofRendererCollection.h"
+#include "ofGLRenderer.h"
+#include "ofPixels.h"
 #include "ofLog.h"
+#include "ofGraphicsConstants.h"
 
 #ifndef GL_DEBUG_OUTPUT
 #define GL_DEBUG_OUTPUT                   0x92E0
@@ -612,7 +615,8 @@ int ofGetGLInternalFormatFromPixelFormat(ofPixelFormat pixelFormat){
 		}
 #endif
 	default:
-		ofLogError("ofGLUtils") << "ofGetGLInternalFormatFromPixelFormat(): unknown OF pixel format" << pixelFormat << ", returning GL_RGBA";
+		ofLogError("ofGLUtils") << "ofGetGLInternalFormatFromPixelFormat(): unknown OF pixel format"
+						<< ofToString(pixelFormat) << ", returning GL_RGBA";
 		return GL_RGBA;
 	}
 }
@@ -670,11 +674,13 @@ int ofGetGLFormatFromPixelFormat(ofPixelFormat pixelFormat){
 	default:
 #ifndef TARGET_OPENGLES
 		if(ofIsGLProgrammableRenderer()){
-			ofLogError("ofGLUtils") << "ofGetGLFormatFromPixelFormat(): unknown OF pixel format" << pixelFormat << ", returning GL_RED";
+			ofLogError("ofGLUtils") << "ofGetGLFormatFromPixelFormat(): unknown OF pixel format"
+				<< ofToString(pixelFormat) << ", returning GL_RED";
 			return GL_RED;
 		}else{
 #endif
-			ofLogError("ofGLUtils") << "ofGetGLFormatFromPixelFormat(): unknown OF pixel format" << pixelFormat << ", returning GL_LUMINANCE";
+			ofLogError("ofGLUtils") << "ofGetGLFormatFromPixelFormat(): unknown OF pixel format"
+				<< ofToString(pixelFormat) << ", returning GL_LUMINANCE";
 			return GL_LUMINANCE;
 #ifndef TARGET_OPENGLES
 		}
@@ -887,7 +893,7 @@ namespace{
 	void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void * user){
 		ostringstream oss;
 		oss << "GL Debug: ";
-		
+
 		ofLogLevel level;
 		switch (type) {
 		case GL_DEBUG_TYPE_ERROR:
@@ -930,7 +936,7 @@ namespace{
 		}
 
 		oss << ", " << id << ": " << message;
-		
+
 		ofLog(level, oss.str());
 	}
 }
@@ -951,7 +957,7 @@ void ofEnableGLDebugLog(){
 #else
 	if(ofGLCheckExtension("GL_KHR_debug") && ofGLCheckExtension("GL_ARB_debug_output")){
 		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback((GLDEBUGPROC)gl_debug_callback, nullptr);
 	}
 #endif

@@ -5,6 +5,7 @@
 #endif
 
 #include "ofUtils.h"
+#include "ofLog.h"
 
 
 #ifdef TARGET_OSX
@@ -649,6 +650,15 @@ bool ofFile::canRead() const {
 	auto perm = std::filesystem::status(myFile).permissions();
 	struct stat info;
 	stat(path().c_str(), &info);  // Error check omitted
+#if OF_USING_STD_FS
+	if(geteuid() == info.st_uid){
+		return (perm & std::filesystem::perms::owner_read) != std::filesystem::perms::none;
+	}else if (getegid() == info.st_gid){
+		return (perm & std::filesystem::perms::group_read) != std::filesystem::perms::none;
+	}else{
+		return (perm & std::filesystem::perms::others_read) != std::filesystem::perms::none;
+	}
+#else
 	if(geteuid() == info.st_uid){
 		return perm & std::filesystem::owner_read;
 	}else if (getegid() == info.st_gid){
@@ -656,6 +666,7 @@ bool ofFile::canRead() const {
 	}else{
 		return perm & std::filesystem::others_read;
 	}
+#endif
 #endif
 }
 
@@ -674,6 +685,15 @@ bool ofFile::canWrite() const {
 	auto perm = std::filesystem::status(myFile).permissions();
 	struct stat info;
 	stat(path().c_str(), &info);  // Error check omitted
+#if OF_USING_STD_FS
+	if(geteuid() == info.st_uid){
+		return (perm & std::filesystem::perms::owner_write) != std::filesystem::perms::none;
+	}else if (getegid() == info.st_gid){
+		return (perm & std::filesystem::perms::group_write) != std::filesystem::perms::none;
+	}else{
+		return (perm & std::filesystem::perms::others_write) != std::filesystem::perms::none;
+	}
+#else
 	if(geteuid() == info.st_uid){
 		return perm & std::filesystem::owner_write;
 	}else if (getegid() == info.st_gid){
@@ -681,6 +701,7 @@ bool ofFile::canWrite() const {
 	}else{
 		return perm & std::filesystem::others_write;
 	}
+#endif
 #endif
 }
 
@@ -694,6 +715,15 @@ bool ofFile::canExecute() const {
     auto perm = std::filesystem::status(myFile).permissions();
 	struct stat info;
 	stat(path().c_str(), &info);  // Error check omitted
+#if OF_USING_STD_FS
+	if(geteuid() == info.st_uid){
+		return (perm & std::filesystem::perms::owner_exec) != std::filesystem::perms::none;
+	}else if (getegid() == info.st_gid){
+		return (perm & std::filesystem::perms::group_exec) != std::filesystem::perms::none;
+	}else{
+		return (perm & std::filesystem::perms::others_exec) != std::filesystem::perms::none;
+	}
+#else
 	if(geteuid() == info.st_uid){
 		return perm & std::filesystem::owner_exe;
 	}else if (getegid() == info.st_gid){
@@ -701,6 +731,7 @@ bool ofFile::canExecute() const {
 	}else{
 		return perm & std::filesystem::others_exe;
 	}
+#endif
 #endif
 }
 
@@ -726,7 +757,11 @@ bool ofFile::isDevice() const {
 #elif defied(TARGET_WIN32)
 	return false;
 #else
+#if OF_USING_STD_FS
+	return std::filesystem::is_block_file(std::filesystem::status(myFile));
+#else
 	return std::filesystem::status(myFile).type() == std::filesystem::block_file;
+#endif
 #endif
 }
 
@@ -797,11 +832,19 @@ void ofFile::setExecutable(bool flag){
         qf.setPermissions(qf.permissions()&~QFileDevice::ExeOwner);
 #else
 	try{
+#if OF_USING_STD_FS
+		if(flag){
+			std::filesystem::permissions(myFile, std::filesystem::perms::owner_exec | std::filesystem::perms::add_perms);
+		} else{
+			std::filesystem::permissions(myFile, std::filesystem::perms::owner_exec | std::filesystem::perms::remove_perms);
+		}
+#else
 		if(flag){
 			std::filesystem::permissions(myFile, std::filesystem::perms::owner_exe | std::filesystem::perms::add_perms);
 		} else{
 			std::filesystem::permissions(myFile, std::filesystem::perms::owner_exe | std::filesystem::perms::remove_perms);
 		}
+#endif
 	}catch(std::exception & e){
 		ofLogError() << "Couldn't set executable permission on " << myFile << ": " << e.what();
 	}

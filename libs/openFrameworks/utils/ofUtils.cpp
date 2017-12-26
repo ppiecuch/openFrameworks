@@ -2,15 +2,23 @@
 #include "ofImage.h"
 #include "ofFileUtils.h"
 #include "ofLog.h"
+#include "ofAppBaseWindow.h"
+#include "ofMainLoop.h"
+#include "ofAppRunner.h"
+#include "ofEvents.h"
+#include "ofGLUtils.h"
+#include "ofMath.h"
 
 #include <chrono>
 #include <numeric>
 #include <locale>
+#include <cstdarg>
 #ifdef TARGET_QT
 # include <QDir>
 #else
 # include "uriparser/Uri.h"
 #endif
+#include "uriparser/Uri.h"
 
 #ifdef TARGET_WIN32	 // For ofLaunchBrowser.
 	#include <shellapi.h>
