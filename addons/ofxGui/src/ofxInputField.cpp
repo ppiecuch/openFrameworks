@@ -60,27 +60,6 @@ namespace{
 		}
 		return std::max(std::min(ret, -127), 127);
 	}
-
-	ofMesh rectangle(const ofRectangle & r, const ofFloatColor & c){
-		ofMesh mesh;
-		mesh.addVertex(r.position);
-		mesh.addVertex(glm::vec3(r.x + r.width, r.y, 0));
-		mesh.addVertex(glm::vec3(r.x + r.width, r.y + r.height, 0));
-
-		mesh.addVertex(glm::vec3(r.x + r.width, r.y + r.height, 0));
-		mesh.addVertex(glm::vec3(r.x, r.y + r.height, 0));
-		mesh.addVertex(glm::vec3(r.x, r.y, 0));
-
-		mesh.addColor(c);
-		mesh.addColor(c);
-		mesh.addColor(c);
-
-		mesh.addColor(c);
-		mesh.addColor(c);
-		mesh.addColor(c);
-
-		return mesh;
-	}
 }
 
 //-----------------------------------------------------------

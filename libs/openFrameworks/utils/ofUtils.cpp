@@ -18,7 +18,6 @@
 #else
 # include "uriparser/Uri.h"
 #endif
-#include "uriparser/Uri.h"
 
 #ifdef TARGET_WIN32	 // For ofLaunchBrowser.
 	#include <shellapi.h>

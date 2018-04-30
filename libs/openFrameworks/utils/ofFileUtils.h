@@ -23,6 +23,7 @@
 		namespace filesystem = boost::filesystem;
 	}
 # endif
+#endif // TARGET_QT
 
 //----------------------------------------------------------
 // ofBuffer

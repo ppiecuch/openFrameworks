@@ -159,6 +159,12 @@ namespace std { namespace filesystem {
         path extension() const { return path(QFileInfo(string().c_str()).completeSuffix().toStdString()); }
         path filename() const { return path(QFileInfo(string().c_str()).fileName().toStdString()); }
         path stem() const { return path(QFileInfo(string().c_str()).baseName().toStdString()); }
+        path& replace_extension( const path& replacement = path() ) {
+            QFileInfo info(string().c_str());
+            QString newName = info.path() + info.baseName() + replacement.string().c_str();
+            *this = newName.toStdString();
+            return *this;
+        }
         path & operator /= (const path & p) {
             if ( ! p.empty() ) {
                 if (this->empty()) {
@@ -186,15 +192,15 @@ namespace std { namespace filesystem {
     void current_path(const path &p) { QDir::setCurrent(p.string().c_str()); }
     bool copy_file(const path& from, const path& to) {}
     bool rename(const path& old_p, const path& new_p) {}
-    bool remove(const path& p) {}
-    bool remove_all(const path& p) {}
-    bool create_directories(const path& p) {}
-    bool create_directory(const path& p) {}
-    path canonical(const path& p, const path& base = current_path()) {}
-    path absolute(const path& p, const path& base = current_path()) {}
-    bool is_regular_file(const path &p) { QFileInfo(p.string().c_str()); }
-	bool is_symlink(const path &p) { QFileInfo(p.string().c_str()); }
-	bool is_directory(const path &p) { QFileInfo(p.string().c_str()); }
+    bool remove(const path& p) { QFile::remove(p.string().c_str()); }
+    bool remove_all(const path& p) { return QDir().rmpath(p.string().c_str()); }
+    bool create_directories(const path& p) { return QDir().mkpath(p.string().c_str()); }
+    bool create_directory(const path& p) { return QDir().mkdir(p.string().c_str()); }
+    path canonical(const path& p) { return QFileInfo(p.string().c_str()). canonicalFilePath().toStdString(); }
+    path absolute(const path& p) { return QFileInfo(p.string().c_str()).absoluteFilePath().toStdString(); }
+    bool is_regular_file(const path &p) { QFileInfo(p.string().c_str()).isFile(); }
+	bool is_symlink(const path &p) { QFileInfo(p.string().c_str()).isSymLink(); }
+	bool is_directory(const path &p) { return QFileInfo(p.string().c_str()).isDir(); }
     struct status_info {
         status_info(long uid, long gid, int perm) : st_uid(uid), st_gid(gid), st_perm(perm) {}
         QFile::Permissions permissions() const { return st_perm; };
@@ -209,11 +215,13 @@ namespace std { namespace filesystem {
         directory_entry() {}
         directory_entry(const std::string &p) : entry(p) {}
         const std::filesystem::path path() const { return entry; }
+        operator const std::filesystem::path& () const { return entry; }
         std::filesystem::path entry;
     };
     struct directory_iterator : public QDirIterator {
         directory_iterator() : QDirIterator("") {}
-        directory_iterator(const std::filesystem::path &p) : QDirIterator(p.c_str()), entry(filePath().toStdString()) {}
+        directory_iterator(const std::filesystem::path &p, IteratorFlags flags = NoIteratorFlags) : QDirIterator(p.c_str(), flags), entry(filePath().toStdString()) {}
+        const directory_entry& operator*() const { return entry; }
         const directory_entry *operator ->() { return &entry; }
         bool operator == (const directory_iterator & other) const {
             return (entry.path().empty() && other.entry.path().empty());
@@ -221,6 +229,10 @@ namespace std { namespace filesystem {
         bool operator != (const directory_iterator & other) const { return !(*this == other); }
         void operator ++() { entry = next().toStdString(); }
         directory_entry entry;
+    };
+    struct recursive_directory_iterator : public directory_iterator {
+        recursive_directory_iterator() : directory_iterator() {}
+        recursive_directory_iterator(const std::filesystem::path &p) : directory_iterator(p.c_str(), Subdirectories) {}
     };
     inline path operator / (const path & lhs, const path & rhs)
     {
@@ -233,7 +245,7 @@ namespace std { namespace filesystem {
 
 // then the the platform specific includes:
 #ifdef TARGET_QT
-    #include <QtOpenGL/qgl.h>
+    #include <qopengl.h>
 #endif
 
 #ifdef TARGET_WIN32
