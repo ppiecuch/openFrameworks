@@ -45,7 +45,8 @@ public:
     inline ofQuaternion(float angle1, const ofVec3f& axis1, float angle2, const ofVec3f& axis2, float angle3, const ofVec3f& axis3);
     
 	ofQuaternion(const glm::quat & q);
-	operator glm::quat() const;
+
+    operator glm::quat() const;
 
     /// \}
     
@@ -501,3 +502,10 @@ void ofQuaternion::normalize(){
 	_v.z *= factor;
 	_v.w *= factor;
 }
+
+
+//----------------------------------------
+// glm utilities
+const glm::quat operator-(const glm::quat& lhs, const glm::quat& rhs);
+const glm::quat operator*(const glm::quat& lhs, const glm::quat& rhs);
+const glm::quat operator*(const glm::quat& lhs, const float s);

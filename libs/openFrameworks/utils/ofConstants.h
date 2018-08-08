@@ -181,29 +181,29 @@ namespace std { namespace filesystem {
         path parent_path() { path(QFileInfo(string().c_str()).dir().path().toStdString()); }
         bool is_absolute() const { return QFileInfo(string().c_str()).isAbsolute(); }
     };
-    qint64 last_write_time(const path &p) { return QFileInfo(string().c_str()).lastModified().toSecsSinceEpoch(); }
-    size_t file_size(const path &p) { return QFile::exists(p.string().c_str()); }
-    bool exists(const path &p) { return QFile::exists(p.string().c_str()); }
-    path current_path() { return path( QDir::currentPath().toStdString() ); }
-    void current_path(const path &p) { QDir::setCurrent(p.string().c_str()); }
-    bool copy_file(const path& from, const path& to) {}
-    bool rename(const path& old_p, const path& new_p) {}
-    bool remove(const path& p) { QFile::remove(p.string().c_str()); }
-    bool remove_all(const path& p) { return QDir().rmpath(p.string().c_str()); }
-    bool create_directories(const path& p) { return QDir().mkpath(p.string().c_str()); }
-    bool create_directory(const path& p) { return QDir().mkdir(p.string().c_str()); }
-    path canonical(const path& p) { return QFileInfo(p.string().c_str()). canonicalFilePath().toStdString(); }
-    path absolute(const path& p) { return QFileInfo(p.string().c_str()).absoluteFilePath().toStdString(); }
-    bool is_regular_file(const path &p) { QFileInfo(p.string().c_str()).isFile(); }
-	bool is_symlink(const path &p) { QFileInfo(p.string().c_str()).isSymLink(); }
-	bool is_directory(const path &p) { return QFileInfo(p.string().c_str()).isDir(); }
+    inline qint64 last_write_time(const path &p) { return QFileInfo(string().c_str()).lastModified().toSecsSinceEpoch(); }
+    inline size_t file_size(const path &p) { return QFile::exists(p.string().c_str()); }
+    inline bool exists(const path &p) { return QFile::exists(p.string().c_str()); }
+    inline path current_path() { return path( QDir::currentPath().toStdString() ); }
+    inline void current_path(const path &p) { QDir::setCurrent(p.string().c_str()); }
+    inline bool copy_file(const path& from, const path& to) {}
+    inline bool rename(const path& old_p, const path& new_p) {}
+    inline bool remove(const path& p) { QFile::remove(p.string().c_str()); }
+    inline bool remove_all(const path& p) { return QDir().rmpath(p.string().c_str()); }
+    inline bool create_directories(const path& p) { return QDir().mkpath(p.string().c_str()); }
+    inline bool create_directory(const path& p) { return QDir().mkdir(p.string().c_str()); }
+    inline path canonical(const path& p) { return QFileInfo(p.string().c_str()). canonicalFilePath().toStdString(); }
+    inline path absolute(const path& p) { return QFileInfo(p.string().c_str()).absoluteFilePath().toStdString(); }
+    inline bool is_regular_file(const path &p) { QFileInfo(p.string().c_str()).isFile(); }
+	inline bool is_symlink(const path &p) { QFileInfo(p.string().c_str()).isSymLink(); }
+	inline bool is_directory(const path &p) { return QFileInfo(p.string().c_str()).isDir(); }
     struct status_info {
         status_info(long uid, long gid, int perm) : st_uid(uid), st_gid(gid), st_perm(perm) {}
         QFile::Permissions permissions() const { return st_perm; };
         long st_uid, st_gid;
         QFile::Permissions st_perm;
     };
-    status_info status(const path &p) {
+    inline status_info status(const path &p) {
         QFile::Permissions pm = QFileInfo(p.string().c_str()).permissions();
         return status_info(0, 0, pm);
     };

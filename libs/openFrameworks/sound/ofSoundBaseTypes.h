@@ -154,7 +154,7 @@ public:
 	virtual ofSoundDevice getOutDevice() const = 0;
 };
 
-std::string toString(ofSoundDevice::Api api);
+inline std::string toString(ofSoundDevice::Api api);
 
 
 //----------------------------------------------------------

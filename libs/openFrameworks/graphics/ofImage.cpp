@@ -443,13 +443,13 @@ bool ofLoadImage(ofTexture & tex, const ofBuffer & buffer, const ofImageLoadSett
 //----------------------------------------------------------------
 #if defined(TARGET_QT)
 template<typename PixelType>
-static void saveImage(const ofPixels_<PixelType> & _pix, const std::filesystem::path& _fileName, ofImageQualityType qualityLevel) {
+static bool saveImage(const ofPixels_<PixelType> & _pix, const std::filesystem::path& _fileName, ofImageQualityType qualityLevel) {
 	// Make a local copy.
 	ofPixels_<PixelType> pix = _pix;
 
 	if (pix.isAllocated() == false){
 		ofLogError("ofImage") << "saveImage(): couldn't save \"" << _fileName << "\", pixels are not allocated";
-		return;
+		return false;
 	}
 	#ifdef TARGET_LITTLE_ENDIAN
 	if(sizeof(PixelType) == 1 && (pix.getPixelFormat()==OF_PIXELS_RGB || pix.getPixelFormat()==OF_PIXELS_RGBA)) {
@@ -459,11 +459,14 @@ static void saveImage(const ofPixels_<PixelType> & _pix, const std::filesystem::
 	QImage result = getQImageFromPixels(pix);
     if (result.isNull()){
 		ofLogError("ofImage") << "QImage: failed to create image";
+        return false;
     }else{
         if(!result.save(_fileName.string().c_str())){
             ofLogError("ofImage") << "QImage: failed to save image";
+            return false;
         }
     }
+    return true;
 }
 #else
 template<typename PixelType>

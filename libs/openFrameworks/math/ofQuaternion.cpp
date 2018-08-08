@@ -317,3 +317,21 @@ std::istream& operator>>(std::istream& is, ofQuaternion &q) {
     is >> q._v.w;
     return is;
 }
+
+
+//----------------------------------------
+const glm::quat operator-(const glm::quat& lhs, const glm::quat& rhs) {
+    return glm::quat(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w);
+}
+const glm::quat operator*(const glm::quat& lhs, const glm::quat& rhs) {
+    return glm::quat(rhs.w*lhs.x + rhs.x*lhs.w + rhs.y*lhs.z - rhs.z*lhs.y,
+                     rhs.w*lhs.y - rhs.x*lhs.z + rhs.y*lhs.w + rhs.z*lhs.x,
+                     rhs.w*lhs.z + rhs.x*lhs.y - rhs.y*lhs.x + rhs.z*lhs.w,
+                     rhs.w*lhs.w - rhs.x*lhs.x - rhs.y*lhs.y - rhs.z*lhs.z);
+}
+const glm::quat operator*(const glm::quat& rhs, const float s) {
+    return glm::quat(rhs.w*s + rhs.x*s + rhs.y*s - rhs.z*s,
+                     rhs.w*s - rhs.x*s + rhs.y*s + rhs.z*s,
+                     rhs.w*s + rhs.x*s - rhs.y*s + rhs.z*s,
+                     rhs.w*s - rhs.x*s - rhs.y*s - rhs.z*s);
+}

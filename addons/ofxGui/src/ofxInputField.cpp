@@ -77,7 +77,7 @@ ofxInputField<Type>::ofxInputField(ofParameter<Type> _val, float width, float he
 template<typename Type>
 ofxInputField<Type>* ofxInputField<Type>::setup(ofParameter<Type> _val, float width, float height){
 	value.makeReferenceTo(_val);
-	visibleInput = input = toString(value.get());
+	visibleInput = input = gui::toString(value.get());
 	b.x = 0;
 	b.y = 0;
 	b.width = width;
@@ -365,7 +365,7 @@ bool ofxInputField<Type>::mouseScrolled(ofMouseEventArgs & mouse){
 	if(b.inside(mouse)){
 		if(!bGuiActive){
 			if(mouse.y>0 || mouse.y<0){
-				double range = getRange(value.getMin(), value.getMax(), b.width);
+				double range = gui::getRange(value.getMin(), value.getMax(), b.width);
 				Type newValue = value + ofMap(mouse.y,-1,1,-range, range);
 				newValue = ofClamp(newValue,value.getMin(),value.getMax());
 				value = newValue;
@@ -464,7 +464,7 @@ bool ofxInputField<Type>::keyPressed(ofKeyEventArgs & args){
 		}else if(key == OF_KEY_RETURN){
 			leaveFocus();
 		}else if(key == OF_KEY_ESC){
-			input = toString(value.get());
+			input = gui::toString(value.get());
 			leaveFocus();
 		}else if(key == 'a' && args.hasModifier(OF_KEY_CONTROL)){
 			calculateSelectionArea(0, ofUTF8Length(input));
@@ -581,7 +581,7 @@ void ofxInputField<Type>::generateDraw(){
 
 	auto input = visibleInput;
 	if(!bGuiActive && !containsValidValue()){
-		input = toString(value);
+		input = gui::toString(value);
 	}
 
 	auto inputWidth = getTextBoundingBox(input,0,0).width;
@@ -709,7 +709,7 @@ void ofxInputField<string>::parseInput(){
 //-----------------------------------------------------------
 template<typename Type>
 void ofxInputField<Type>::valueChanged(Type & value){
-	visibleInput = input = toString(value);
+	visibleInput = input = gui::toString(value);
 	if(bGuiActive){
 		moveCursor(ofUTF8Length(input));
 	}

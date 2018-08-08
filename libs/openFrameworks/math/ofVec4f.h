@@ -31,7 +31,8 @@ public:
 	ofVec4f( const glm::vec2& vec);
 	ofVec4f( const glm::vec3& vec);
 	ofVec4f( const glm::vec4& vec);
-	operator glm::vec4() const;
+
+    operator glm::vec4() const;
 
     /// \}
 

@@ -5,6 +5,7 @@
 #include "ofVec4f.h"
 #include "ofMathConstants.h"
 #include "glm/vec3.hpp"
+#include "glm/geometric.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -130,7 +131,8 @@ public:
 	ofVec3f( const glm::vec2 & vec );
 	ofVec3f( const glm::vec3 & vec );
 	ofVec3f( const glm::vec4 & vec );
-	operator glm::vec3() const;
+
+    operator glm::vec3() const;
 
 	/// \}
 
@@ -1889,6 +1891,19 @@ inline ofVec3f operator*( float f, const ofVec3f& vec ) {
 
 inline ofVec3f operator/( float f, const ofVec3f& vec ) {
     return ofVec3f( f/vec.x, f/vec.y, f/vec.z);
+}
+
+
+
+
+// glm utilities
+//
+//
+namespace glm {
+    inline float distancesquared(const vec3 &a, const vec3 &b) {
+        const vec3 t = a - b;
+        return dot(t, t);
+    }
 }
 
 /// \endcond
