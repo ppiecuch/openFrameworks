@@ -104,7 +104,7 @@ int ofMatrixStack::getRenderSurfaceWidth() const{
 	if(currentRenderSurface){
 		return currentRenderSurface->getWidth();
 	}else if(currentWindow){
-		return currentWindow->getWindowSize().x;
+		return currentWindow->getWindowSize().x*currentWindow->getPixelScreenCoordScale();
 	}else{
 		return 0;
 	}
@@ -114,7 +114,7 @@ int ofMatrixStack::getRenderSurfaceHeight() const{
 	if(currentRenderSurface){
 		return currentRenderSurface->getHeight();
 	}else if(currentWindow){
-		return currentWindow->getWindowSize().y;
+		return currentWindow->getWindowSize().y*currentWindow->getPixelScreenCoordScale();
 	}else{
 		return 0;
 	}
@@ -177,6 +177,10 @@ ofRectangle ofMatrixStack::getFullSurfaceViewport() const{
 	}else{
 		return ofRectangle();
 	}
+}
+
+float ofMatrixStack::getViewportPixelCoordScale() const{
+    return currentWindow->getPixelScreenCoordScale();
 }
 
 void ofMatrixStack::nativeViewport(ofRectangle viewport){

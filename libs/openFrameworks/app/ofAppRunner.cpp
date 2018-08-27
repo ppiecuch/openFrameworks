@@ -23,9 +23,16 @@
 
 using namespace std;
 
-#ifdef QT_GUI_LIB
-    // nothing
-#elif !defined( TARGET_OF_IOS ) & !defined(TARGET_ANDROID) & !defined(TARGET_EMSCRIPTEN) & !defined(TARGET_RASPBERRY_PI)
+#ifdef TARGET_QT
+    #include QApp_h
+    // global Qt application object
+    QApp &qapplication() {
+        int argc = 1;
+        char *argv[] = { "of-qt-apprunner" };
+        static QApp _app(argc, argv);
+        return _app;
+    }
+#elif !defined(TARGET_OF_IOS) & !defined(TARGET_ANDROID) & !defined(TARGET_EMSCRIPTEN) & !defined(TARGET_RASPBERRY_PI)
 	#include "ofAppGLFWWindow.h"
 	//special case so we preserve supplied settngs
 	//TODO: remove me when we remove the ofAppGLFWWindow setters.
@@ -76,19 +83,6 @@ namespace{
 		return *noopEvents;
 	}
 
-#ifdef TARGET_QT
-	QCoreApplication & qapplication(){
-        int argc = 1;
-        char *argv[] = { "of-qt-apprunner" };
-#ifdef QT_WIDGETS_LIB
-        static QApplication *app = new QApplication(argc, argv);
-#else
-        static QGuiApplication *app = new QGuiApplication(arrc, argv);
-#endif
-		return *app;
-	}
-#endif
-
     #if defined(TARGET_LINUX) || defined(TARGET_OSX) || defined(QT_OS_MAC) || defined(QT_OS_LINUX)
         #include <signal.h>
         #include <string.h>
@@ -126,9 +120,7 @@ void ofInit(){
 
 #ifdef TARGET_QT
     qapplication();
-#endif
-
-#if defined(TARGET_ANDROID) || defined(TARGET_OF_IOS)
+#elif defined(TARGET_ANDROID) || defined(TARGET_OF_IOS)
     // manage own exit
 #else
 	atexit(ofExitCallback);
@@ -146,7 +138,7 @@ void ofInit(){
 	signal(SIGABRT, &ofSignalHandler);  // abort signal
 #endif
 
-        of::priv::initutils();
+    of::priv::initutils();
 
 	#ifdef WIN32_HIGH_RES_TIMING
 		timeBeginPeriod(1);		// ! experimental, sets high res time
@@ -227,8 +219,13 @@ void ofSetupOpenGL(int w, int h, ofWindowMode screenMode){
 	settings.glesVersion = 1;
 #else
 	ofGLWindowSettings settings;
+# ifdef __APPLE__
+	settings.glVersionMajor = 3;
+	settings.glVersionMinor = 1;
+# else
 	settings.glVersionMajor = 2;
 	settings.glVersionMinor = 1;
+# endif
 #endif
 
 	settings.setSize(w, h);

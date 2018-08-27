@@ -13,6 +13,17 @@ class ofBaseApp;
 class ofBaseRenderer;
 class ofCoreEvents;
 
+#ifdef TARGET_QT
+# ifdef QT_WIDGETS_LIB
+# define QApp QApplication
+# define QApp_h <qapplication.h>
+# else
+# define QApp QGuiApplication
+# define QApp_h <qguiapplication.h>
+# endif
+class QApp;
+QApp &qapplication();
+#endif
 
 void ofInit();
 void ofSetupOpenGL(int w, int h, ofWindowMode screenMode);	// sets up the opengl context!

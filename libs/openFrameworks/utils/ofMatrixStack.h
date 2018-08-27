@@ -35,6 +35,7 @@ public:
 	ofRectangle getCurrentViewport() const;
 	ofRectangle getNativeViewport() const;
 	ofRectangle getFullSurfaceViewport() const;
+	float getViewportPixelCoordScale() const;
 
 	const glm::mat4 & getProjectionMatrix() const;
 	const glm::mat4 & getViewInverse() const;

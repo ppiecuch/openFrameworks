@@ -17,6 +17,11 @@
 	#include "ofAppNoWindow.h"
 #elif defined(TARGET_QT)
 	#include "ofAppQtWindow.h"
+# ifdef QT_WIDGETS_LIB
+    #include <qapplication.h>
+# else
+    #include <qguiapplication.h>
+# endif
 #elif defined(TARGET_OF_IOS)
 	#include "ofAppiOSWindow.h"
 #elif defined(TARGET_ANDROID)
@@ -104,23 +109,32 @@ void ofMainLoop::run(shared_ptr<ofAppBaseWindow> window, shared_ptr<ofBaseApp> &
 			ofAddListener(ofxAndroidEvents().pause,androidApp,&ofxAndroidApp::pause,OF_EVENT_ORDER_APP);
 			ofAddListener(ofxAndroidEvents().resume,androidApp,&ofxAndroidApp::resume,OF_EVENT_ORDER_APP);
 			ofAddListener(ofxAndroidEvents().unloadGL,androidApp,&ofxAndroidApp::unloadGL,OF_EVENT_ORDER_APP);
-			ofAddListener(ofxAndroidEvents().reloadGL,androidApp,&ofxAndroidApp::reloadGL,OF_EVENT_ORDER_APP);
+			ofAddListener(ofxAndroidEvents().reloadGL,androidApp,&ofxAndroidApp::reloadGL,OF_EVENT_ORDER
+			_APP);
 			ofAddListener(ofxAndroidEvents().swipe,androidApp,&ofxAndroidApp::swipe,OF_EVENT_ORDER_APP);
 			ofAddListener(ofxAndroidEvents().deviceOrientationChanged,androidApp,&ofxAndroidApp::deviceOrientationChangedEvent,OF_EVENT_ORDER_APP);
 		}
 #endif
 	}
 	currentWindow = window;
-	window->makeCurrent();
+#ifndef TARGET_QT
+    window->makeCurrent();
 	if(!windowLoop){
 		window->events().notifySetup();
 	}
+#endif
 }
 
 void ofMainLoop::run(std::shared_ptr<ofBaseApp> && app){
+#ifdef TARGET_QT
+    ofLogInfo("ofAppQtWindow") << errorCode << ": " << errorDescription;
+    printf("Running exec()\n");
+    qapplication().exec();
+#else // TARGET_QT
 	if(!windowsApps.empty()){
 		run(windowsApps.begin()->first, std::move(app));
 	}
+#endif // TARGET_QT
 }
 
 int ofMainLoop::loop(){

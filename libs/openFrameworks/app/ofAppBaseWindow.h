@@ -56,6 +56,8 @@ public:
 	virtual int		getWidth(){ return 0; }
 	virtual int		getHeight(){ return 0; }
 
+	virtual float	getPixelScreenCoordScale() { return 1; }
+
 	virtual void	setWindowTitle(std::string title){}
 
 	virtual ofWindowMode	getWindowMode() {return OF_WINDOW ;}
