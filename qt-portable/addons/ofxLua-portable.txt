@@ -1,0 +1,4 @@
+src/ofxLua.cpp
+src/ofxLua.h
+src/ofxLuaFileWriter.cpp
+src/ofxLuaFileWriter.h

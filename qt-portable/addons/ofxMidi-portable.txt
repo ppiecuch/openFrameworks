@@ -1,0 +1,16 @@
+src/ofxBaseMidi.cpp
+src/ofxBaseMidi.h
+src/ofxMidi.cpp
+src/ofxMidi.h
+src/ofxMidiClock.cpp
+src/ofxMidiClock.h
+src/ofxMidiConstants.h
+src/ofxMidiIn.cpp
+src/ofxMidiIn.h
+src/ofxMidiMessage.cpp
+src/ofxMidiMessage.h
+src/ofxMidiOut.cpp
+src/ofxMidiOut.h
+src/ofxMidiTimecode.cpp
+src/ofxMidiTimecode.h
+src/ofxMidiTypes.h

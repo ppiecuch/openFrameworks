@@ -44,11 +44,18 @@ echo "#pragma once" > "$HM"
 echo "#define TARGET_QT" > "$HM"
 
 function process_module {
-    list=$1
+    list=addons/${1}-portable.txt
     nm=$2
     OUTC="ofx-addon-$nm.cpp"
 
-    px=`dirname $list`
+    px=../addons/$1
+    if [ ! -d "$px" ]; then
+        px=../addons-all/$1
+    fi
+    if [ ! -d "$px" ]; then
+        echo "*** $1 not found"
+        return
+    fi
 
     echo "/* `date` */" > "$OUTC"
     echo "#include \"$HM\"" >> "$OUTC"
@@ -203,11 +210,11 @@ echo " Ok (clean ext)"
 
 # build separate modules
 CM=""
-process_module ../addons-all/ofxImGui/portable.txt imgui; CM="$CM ofx-addon-imgui.cpp"
-process_module ../addons-all/ofxNanoVG/portable.txt nanovg; CM="$CM ofx-addon-nanovg.cpp"
-process_module ../addons-all/ofxMidi/portable.txt midi; CM="$CM ofx-addon-midi.cpp"
-process_module ../addons-all/ofxLua/portable.txt lua; CM="$CM ofx-addon-lua.cpp"
-process_module ../addons/ofxSvg/portable.txt svg; CM="$CM ofx-addon-svg.cpp"
+process_module ofxImGui imgui; CM="$CM ofx-addon-imgui.cpp"
+process_module ofxNanoVG nanovg; CM="$CM ofx-addon-nanovg.cpp"
+process_module ofxMidi midi; CM="$CM ofx-addon-midi.cpp"
+process_module ofxLua lua; CM="$CM ofx-addon-lua.cpp"
+process_module ofxSvg svg; CM="$CM ofx-addon-svg.cpp"
 
 for f in `cat portable.txt`; do
     ctr=${f:0:1}
