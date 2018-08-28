@@ -126,15 +126,12 @@ void ofMainLoop::run(shared_ptr<ofAppBaseWindow> window, shared_ptr<ofBaseApp> &
 }
 
 void ofMainLoop::run(std::shared_ptr<ofBaseApp> && app){
-#ifdef TARGET_QT
-    ofLogInfo("ofAppQtWindow") << errorCode << ": " << errorDescription;
-    printf("Running exec()\n");
-    qapplication().exec();
-#else // TARGET_QT
 	if(!windowsApps.empty()){
 		run(windowsApps.begin()->first, std::move(app));
 	}
-#endif // TARGET_QT
+#ifdef TARGET_QT
+    qapplication().exec();
+#endif
 }
 
 int ofMainLoop::loop(){

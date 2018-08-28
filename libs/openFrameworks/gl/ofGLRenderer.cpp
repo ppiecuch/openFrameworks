@@ -682,7 +682,15 @@ void ofGLRenderer::viewport(ofRectangle viewport_){
 void ofGLRenderer::viewport(float x, float y, float width, float height, bool vflip) {
 	matrixStack.viewport(x,y,width,height,vflip);
 	ofRectangle nativeViewport = matrixStack.getNativeViewport();
+#ifdef TARGET_QT
+	glViewport(
+        nativeViewport.x*matrixStack.getViewportPixelCoordScale(),
+        nativeViewport.y*matrixStack.getViewportPixelCoordScale(),
+        nativeViewport.width*matrixStack.getViewportPixelCoordScale(),
+        nativeViewport.height*matrixStack.getViewportPixelCoordScale());
+#else
 	glViewport(nativeViewport.x,nativeViewport.y,nativeViewport.width,nativeViewport.height);
+#endif
 }
 
 //----------------------------------------------------------

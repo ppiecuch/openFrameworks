@@ -104,7 +104,7 @@ int ofMatrixStack::getRenderSurfaceWidth() const{
 	if(currentRenderSurface){
 		return currentRenderSurface->getWidth();
 	}else if(currentWindow){
-		return currentWindow->getWindowSize().x*currentWindow->getPixelScreenCoordScale();
+		return currentWindow->getWindowSize().x;
 	}else{
 		return 0;
 	}
@@ -114,7 +114,7 @@ int ofMatrixStack::getRenderSurfaceHeight() const{
 	if(currentRenderSurface){
 		return currentRenderSurface->getHeight();
 	}else if(currentWindow){
-		return currentWindow->getWindowSize().y*currentWindow->getPixelScreenCoordScale();
+		return currentWindow->getWindowSize().y;
 	}else{
 		return 0;
 	}

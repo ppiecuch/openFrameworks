@@ -220,7 +220,7 @@ void ofSetupOpenGL(int w, int h, ofWindowMode screenMode){
 #else
 	ofGLWindowSettings settings;
 # ifdef __APPLE__
-	settings.glVersionMajor = 3;
+	settings.glVersionMajor = 4;
 	settings.glVersionMinor = 1;
 # else
 	settings.glVersionMajor = 2;
