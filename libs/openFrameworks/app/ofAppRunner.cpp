@@ -24,8 +24,17 @@
 using namespace std;
 
 #ifdef TARGET_QT
-    #include QApp_h
     // global Qt application object
+# ifdef QT_WIDGETS_LIB
+#  include <qapplication.h>
+#  define QAppBase QApplication
+# else
+#  include <qguiapplication.h>
+#  define QAppBase QGuiApplication
+# endif
+    QApp::QApp(int &argc, char **argv) { app = (void*)new QAppBase(argc, argv); }
+    int QApp::exec() { return ((QAppBase*)app)->exec(); }
+
     QApp &qapplication() {
         int argc = 1;
         char *argv[] = { "of-qt-apprunner" };

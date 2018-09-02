@@ -506,6 +506,12 @@ void ofQuaternion::normalize(){
 
 //----------------------------------------
 // glm utilities
-const glm::quat operator-(const glm::quat& lhs, const glm::quat& rhs);
-const glm::quat operator*(const glm::quat& lhs, const glm::quat& rhs);
-const glm::quat operator*(const glm::quat& lhs, const float s);
+#include "glm/gtc/quaternion.hpp"
+
+namespace glm {
+	template <typename T, precision P>
+	GLM_FUNC_QUALIFIER tquat<T, P> operator-(tquat<T, P> const& p, tquat<T, P> const& q)
+	{
+		return detail::compute_quat_sub<T, P, detail::is_aligned<P>::value>::call(tquat<T, P>(p), tquat<T, P>(q));
+	}
+}

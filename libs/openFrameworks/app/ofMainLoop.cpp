@@ -17,11 +17,6 @@
 	#include "ofAppNoWindow.h"
 #elif defined(TARGET_QT)
 	#include "ofAppQtWindow.h"
-# ifdef QT_WIDGETS_LIB
-    #include <qapplication.h>
-# else
-    #include <qguiapplication.h>
-# endif
 #elif defined(TARGET_OF_IOS)
 	#include "ofAppiOSWindow.h"
 #elif defined(TARGET_ANDROID)
@@ -131,6 +126,7 @@ void ofMainLoop::run(std::shared_ptr<ofBaseApp> && app){
 	}
 #ifdef TARGET_QT
     qapplication().exec();
+    qapplication().destroy();
 #endif
 }
 

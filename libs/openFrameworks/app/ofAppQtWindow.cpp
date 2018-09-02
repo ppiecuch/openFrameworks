@@ -147,6 +147,25 @@ public:
     }
 
 	//------------------------------------------------------------
+    int QtToOFModifiers(Qt::KeyboardModifiers mods){
+        int modifiers = 0;
+        if(mods & Qt::ShiftModifier){
+            modifiers |= OF_KEY_SHIFT;
+        }
+
+        if(mods & Qt::AltModifier){
+            modifiers |= OF_KEY_ALT;
+        }
+        if(mods & Qt::ControlModifier){
+            modifiers |= OF_KEY_CONTROL;
+        }
+        if(mods & Qt::MetaModifier){
+            modifiers |= OF_KEY_SUPER;
+        }
+        return modifiers;
+    }
+
+	//------------------------------------------------------------
     void keyboard_cb(Qt::Key keycode, int scancode, const QString &text, bool press, int mods) {
         ofAppQtWindow * instance = m_instance;
         int key = 0;
@@ -265,7 +284,7 @@ public:
         }
     }
 
-    void mouse_cb( Qt::MouseButton button, bool pressed, Qt::KeyboardModifiers mods) {
+    void mouse_cb( Qt::MouseButton button, bool pressed, int modifiers) {
         ofAppQtWindow * instance = m_instance;
         int ofbutton = 0; switch(button){
         case Qt::LeftButton:
@@ -278,16 +297,11 @@ public:
             ofbutton = OF_MOUSE_BUTTON_MIDDLE;
             break;
         }
-
-        if (pressed) {
-            instance->events().notifyMousePressed(instance->events().getMouseX(), instance->events().getMouseY(), ofbutton);
-        } else {
-            instance->events().notifyMouseReleased(instance->events().getMouseX(), instance->events().getMouseY(), ofbutton);
-        }
+        ofMouseEventArgs::Type action = pressed?ofMouseEventArgs::Pressed:ofMouseEventArgs::Released;
         instance->buttonPressed = pressed;
         instance->buttonInUse = ofbutton;
 
-        ofMouseEventArgs args(action, instance->events().getMouseX(), instance->events().getMouseY(), button, modifiers);
+        ofMouseEventArgs args(action, instance->events().getMouseX(), instance->events().getMouseY(), ofbutton, modifiers);
         instance->events().notifyMouseEvent(args);
     }
 
@@ -295,27 +309,19 @@ public:
         ofAppQtWindow * instance = m_instance;
         rotateMouseXY(getOfOrientation(), instance->getWidth(), instance->getHeight(), x, y);
 
-        if(!instance->buttonPressed){
-            instance->events().notifyMouseMoved(x, y);
-        }else{
-            instance->events().notifyMouseDragged(x*, y, instance->buttonInUse);
-        }
-
-        ofMouseEventArgs args(action,
-            x*instance->pixelScreenCoordScale,
-            y*instance->pixelScreenCoordScale,
-            instance->buttonInUse,
-            instance->events().getModifiers());
+        ofMouseEventArgs::Type action = instance->buttonPressed?ofMouseEventArgs::Dragged:ofMouseEventArgs::Moved;
+        ofMouseEventArgs args(action, x, y, instance->buttonInUse, instance->events().getModifiers());
         instance->events().notifyMouseEvent(args);
     }
 
     void entry_cb(int entered) {
         ofAppQtWindow * instance = m_instance;
-        if(entered){
-            instance->events().notifyMouseEntered(instance->events().getMouseX(), instance->events().getMouseY());
-        }else{
-            instance->events().notifyMouseExited(instance->events().getMouseX(), instance->events().getMouseY());
-        }
+        ofMouseEventArgs args(entered?ofMouseEventArgs::Entered:ofMouseEventArgs::Exited,
+            instance->events().getMouseX(),
+            instance->events().getMouseY(),
+            instance->buttonInUse,
+            instance->events().getModifiers());
+        instance->events().notifyMouseEvent(args);
     }
 
     void scroll_cb(double x, double y) {
@@ -345,23 +351,18 @@ public:
         instance->nFramesSinceWindowResized = 0;
     }
 
-    void exit_cb(){
-        ofAppQtWindow * instance = m_instance;
-        instance->events().notifyExit();
-    }
-
     //------------------------------------------------------------
     void mousePressEvent(QMouseEvent *event) {
 		cursorPos = QPoint(event->x(), event->y());
-		Qt::KeyboardModifiers modifiers = event->modifiers();
-		if (event->buttons() & Qt::LeftButton) mouse_cb(Qt::LeftButton, true, modifiers);
-		if (event->buttons() & Qt::RightButton) mouse_cb(Qt::RightButton, true, modifiers);
-		if (event->buttons() & Qt::MiddleButton) mouse_cb(Qt::MiddleButton, true, modifiers);
+		const Qt::KeyboardModifiers modifiers = event->modifiers();
+		if (event->buttons() & Qt::LeftButton) mouse_cb(Qt::LeftButton, true, QtToOFModifiers(modifiers));
+		if (event->buttons() & Qt::RightButton) mouse_cb(Qt::RightButton, true, QtToOFModifiers(modifiers));
+		if (event->buttons() & Qt::MiddleButton) mouse_cb(Qt::MiddleButton, true, QtToOFModifiers(modifiers));
 	}
 	void mouseReleaseEvent(QMouseEvent *event) {
-		cursorPos = QPoint(event->x(), event->y());
-		Qt::KeyboardModifiers modifiers = event->modifiers();
-		mouse_cb(event->button(), false, modifiers);
+		const Qt::KeyboardModifiers modifiers = event->modifiers();
+        // event->x(),y() returns 0 - use last saved position
+		mouse_cb(event->button(), false, QtToOFModifiers(modifiers));
 	}
 	void mouseMoveEvent(QMouseEvent *event) {
 		cursorPos = QPoint(event->x(), event->y());
@@ -474,6 +475,9 @@ ofAppQtWindow::~ofAppQtWindow(){
 }
 
 void ofAppQtWindow::close(){
+	if(windowP){
+        delete windowP;
+    }
 	windowP = nullptr;
 }
 
