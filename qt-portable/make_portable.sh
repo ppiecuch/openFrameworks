@@ -66,14 +66,18 @@ function process_module {
             f=${f#?}
         fi
 
-        f="$px/$f"
+        if [ ! -f "addons/$f" ]; then
+            f="$px/$f"
+        else
+            f="addons/$f"
+        fi
 
         f=${f%%[[:cntrl:]]}
         EXT=${f##*.}
         FILENAME=`basename "$f" | sed 's/\(.*\)\..*/\1/'`
         DIRPATH=`dirname "$f"`
 
-        if [ ! -f $f ]; then
+        if [ ! -f "$f" ]; then
             echo -n "_"
         elif [ ".$EXT" == ".h" -o ".$EXT" == ".hpp" -o ".$EXT" == ".inl" ]; then
             case $ctr in
@@ -259,6 +263,8 @@ for f in shaders\\/phong.frag shaders\\/phong.vert ft2build.h; do
 done
 # remove ft2 headers:
 sed -i "" -e "s/^#include \(FT_.*\)/\/\* #include \1 \*\//" "$C" "$CX"
+# remove ofMain.h:
+sed -i "" -e "s/^#include \(\"ofMain.h\"\)/\/\* #include \1 \*\//" "$C" "$CX"
 
 echo "#include \"$M\"" >> "$C"
 echo ""
