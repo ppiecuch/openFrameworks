@@ -93,7 +93,6 @@ gradlew.bat
 # QtCreator
 *.qbs.user
 *.pro.user
-*.pri
 
 
 #########################
