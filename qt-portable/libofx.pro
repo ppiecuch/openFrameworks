@@ -11,8 +11,8 @@ CONFIG(debug, debug|release): DBG = dbg
 else: DBG = rel
 
 DESTDIR = $$PWD/build-$$[QMAKE_SPEC]$$C11
+OBJECTS_DIR = $$DESTDIR/obj-tmp.$${DBG}
 SUBDIR = $${TEMPLATE}.$${TARGET}.$${DBG}
-OBJECTS_DIR = $$DESTDIR/$$SUBDIR/obj
 MOC_DIR = $$DESTDIR/$$SUBDIR/ui
 UI_DIR = $$DESTDIR/$$SUBDIR/ui
 RCC_DIR = $$DESTDIR/$$SUBDIR/ui

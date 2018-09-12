@@ -1,16 +1,18 @@
 #!/bin/bash
 
-H=ofx.h
-C=ofx.cpp
-CX=ofx-ext.cpp
-M=ofx.moc
-HM=ofx-addon.h
+export LC_CTYPE=C
+export LANG=C
+
+H=ofMain.h
+C=ofMain.cpp
+CX=ofMainExt.cpp
+M=ofMain.moc
 
 echo "/* `date` */" > "$H"
-echo "#pragma once" > "$H"
-echo "#define TARGET_QT" > "$H"
+echo "#pragma once" >> "$H"
+echo "#define TARGET_QT" >> "$H"
 echo "/* `date` */" > "$C"
-echo "#include \"ofx.h\"" >> "$C"
+echo "#include \"+++++\"" >> "$C"
 echo "/* `date` */" > "$CX"
 
 
@@ -39,14 +41,16 @@ ext="pugixml.hpp \
     ext/pugixml.cpp
 "
 
-echo "/* `date` */" > "$HM"
-echo "#pragma once" > "$HM"
-echo "#define TARGET_QT" > "$HM"
-
 function process_module {
     list=addons/${1}-portable.txt
-    nm=$2
-    OUTC="ofx-addon-$nm.cpp"
+    nm=$1
+    OUTC="$nm.cpp"
+    OUTH="$nm.h"
+
+    echo "/* `date` */" > "$OUTH"
+    echo "#pragma once" >> "$OUTH"
+    echo "#define TARGET_QT" >> "$OUTH"
+    echo "#include \"ofMain.h\"" >> "$OUTH"
 
     px=../addons/$1
     if [ ! -d "$px" ]; then
@@ -58,7 +62,7 @@ function process_module {
     fi
 
     echo "/* `date` */" > "$OUTC"
-    echo "#include \"$HM\"" >> "$OUTC"
+    echo "#include \"+++++\"" >> "$OUTC"
 
     for f in `cat $list`; do
         ctr=${f:0:1}
@@ -91,9 +95,9 @@ function process_module {
                 ;;
             *)
                 echo -n "."
-                echo "" >> "$HM"
-                echo "#line 0 \"$f\"" >> "$HM"
-                cat $f >> "$HM"
+                echo "" >> "$OUTH"
+                echo "#line 0 \"$f\"" >> "$OUTH"
+                cat $f >> "$OUTH"
                 ;;
             esac
         elif [ ".$EXT" == ".c" -o ".$EXT" == ".cpp" -o ".$EXT" == ".frag" -o ".$EXT" == ".vert" ]; then
@@ -106,6 +110,44 @@ function process_module {
         fi
     done
     echo " Ok (merge '$nm')"
+    # inline headers
+    for f in `cat $list`; do
+        ctr=${f:0:1}
+        if [[ $ctr == '!' || $ctr == ':' ]]; then
+            f=${f#?}
+        fi
+
+        if [ ! -f "addons/$f" ]; then
+            f="$px/$f"
+        else
+            f="addons/$f"
+        fi
+
+        f=${f%%[[:cntrl:]]}
+        FNEXT=`basename "$f"`
+
+        if [ $ctr == '!' ]; then
+            echo -n "!" # inline
+            sed -i "" -e "/#include \".*$FNEXT\"/r $f" -e "s/#include \"\(.*\)$FNEXT\"/\/\/ inline \1$FNEXT/" "$OUTC" "$OUTH"
+        fi
+    done
+    # fix #include
+    for f in `cat $list`; do
+        f=${f%%[[:cntrl:]]}
+        EXT=${f##*.}
+        FNEXT=`basename "$f"`
+
+        if [ ".$EXT" == ".h" -o ".$EXT" == ".hpp" -o ".$EXT" == ".inl" ]; then
+            echo -n "."
+            sed -i "" \
+                -e "s/#[ ]*include \"\(.*\)$FNEXT\"/\/\* #include \"\1$FNEXT\" \*\//g" \
+                -e "s/#[ ]*include \<$FNEXT\>/\/\* #include \<$FNEXT\> \*\//g" \
+                "$OUTC" "$OUTH"
+        fi
+    done
+    # replace placeholder
+    sed -i "" -e "s/+++++/$OUTH/" "$OUTC"
+    echo " Ok (fix headers '$nm')"
 }
 
 start=`date +%s`
@@ -214,11 +256,12 @@ echo " Ok (clean ext)"
 
 # build separate modules
 CM=""
-process_module ofxImGui imgui; CM="$CM ofx-addon-imgui.cpp"
-process_module ofxNanoVG nanovg; CM="$CM ofx-addon-nanovg.cpp"
-process_module ofxMidi midi; CM="$CM ofx-addon-midi.cpp"
-process_module ofxLua lua; CM="$CM ofx-addon-lua.cpp"
-process_module ofxSvg svg; CM="$CM ofx-addon-svg.cpp"
+HM=""
+for m in ofxImGui ofxNanoVG ofxMidi ofxLua; do
+    process_module $m;
+    CM="$CM ${m}.cpp"
+    HM="$HM ${m}.h"
+done
 
 for f in `cat portable.txt`; do
     ctr=${f:0:1}
@@ -234,7 +277,7 @@ for f in `cat portable.txt`; do
     if [ $ctr == '!' ]; then
         echo -n "!" # inline
         inl=`basename "$f"`
-        sed -i "" -e "/#include \"$inl\"/r $f" -e "s/#include \"$inl\"/\/\/ inline $inl/" "$C"
+        sed -i "" -e "/#[ ]*include \"$inl\"/r $f" -e "s/#include \"$inl\"/\/\/ inline $inl/" "$C"
 	elif [ ".$EXT" == ".h" -o ".$EXT" == ".hpp" -o ".$EXT" == ".inl" ]; then
         echo -n "."
 	    sed -i "" \
@@ -242,7 +285,7 @@ for f in `cat portable.txt`; do
             -e "s~#include \<$FNEXT\>~/* #include \<$FNEXT\> */~" \
             -e "s~#include \"\(.*\)\/$FNEXT\"~/* #include \"\1\/$FNEXT\" */~" \
             -e "s~/\* /\*~/*~" -e "s~\*/ \*/~*/~" \
-            "$H"
+            "$H" $HM
 	    sed -i "" \
             -e "s~#include \"\(.*\)\/$FNEXT\"~/* #include \"\1\/$FNEXT\" */~" \
             -e "s~#include \"$FNEXT\"~/* #include \"$FNEXT\" */~" \
@@ -250,7 +293,7 @@ for f in `cat portable.txt`; do
             -e "s~#include \<\(.*\)\/$FNEXT\>~/* #include \<\1\/$FNEXT\> */~" \
             `# fix double comments (TODO: this should be resoved with regex above)` \
             -e "s~/\* /\*~/*~" -e "s~\*/ \*/~*/~" \
-            "$C" "$CX" ofx-addon-svg.cpp
+            "$C" "$CX" $CM
 	fi
 done
 echo " Ok (clean portable)"
@@ -264,7 +307,9 @@ done
 # remove ft2 headers:
 sed -i "" -e "s/^#include \(FT_.*\)/\/\* #include \1 \*\//" "$C" "$CX"
 # remove ofMain.h:
-sed -i "" -e "s/^#include \(\"ofMain.h\"\)/\/\* #include \1 \*\//" "$C" "$CX"
+sed -i "" -e "s/^#include \(\"ofMain.h\"\)/\/\* #include \1 \*\//" "$C"
+# replace ofMain.h placeholder
+sed -i "" -e "s/+++++/ofMain.h/" "$C"
 
 echo "#include \"$M\"" >> "$C"
 echo ""

@@ -447,3 +447,8 @@ addons/libs/libsvgtiny/svgtiny.c
 ../addons-all/ofxBlender/src/Parser.cpp
 ../addons-all/ofxBlender/src/Parser.h
 ../addons-all/ofxBlender/src/ofxBlender.h
+
+../addons-all/ofxFatLines/sincosineLut.h
+../addons-all/ofxFatLines/sincosineLut.cpp
+../addons-all/ofxFatLines/ofxFatLine.h
+../addons-all/ofxFatLines/ofxFatLine.cpp

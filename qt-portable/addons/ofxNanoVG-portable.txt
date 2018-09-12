@@ -1,11 +1,12 @@
-libs/nanovg/src/fontstash.h
-libs/nanovg/src/stb_truetype.h
-libs/nanovg/src/stb_image.h
+:libs/nanovg/src/fontstash.h
+:libs/nanovg/src/stb_truetype.h
+:libs/nanovg/src/stb_image.h
+libs/nanovg/src/nanovg.h
 libs/nanovg/src/nanovg_gl_utils.h
 libs/nanovg/src/nanovg_gl.h
-libs/nanovg/src/nanovg.h
 libs/nanovg/src/nanovg.c
-libs/nanosvg/src/nanosvgrast.h
 libs/nanosvg/src/nanosvg.h
+libs/nanosvg/src/nanosvgrast.h
+libs/nanosvg/src/qt_io.cpp
 src/ofxNanoVG.cpp
 src/ofxNanoVG.h
