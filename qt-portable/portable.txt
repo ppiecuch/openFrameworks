@@ -257,7 +257,6 @@ addons/libs/libsvgtiny/svgtiny.c
 ../addons-all/ofxControlPanel/src/guiBaseObject.cpp
 ../addons-all/ofxControlPanel/src/guiBaseObject.h
 ../addons-all/ofxControlPanel/src/guiCustomImpl.h
-../addons-all/ofxControlPanel/src/guiIncludes.h
 ../addons-all/ofxControlPanel/src/guiType2DSlider.cpp
 ../addons-all/ofxControlPanel/src/guiType2DSlider.h
 ../addons-all/ofxControlPanel/src/guiTypeChartPlotter.cpp
@@ -295,6 +294,7 @@ addons/libs/libsvgtiny/svgtiny.c
 ../addons-all/ofxControlPanel/src/ofxControlPanel.cpp
 ../addons-all/ofxControlPanel/src/ofxControlPanel.h
 ../addons-all/ofxControlPanel/src/ofxAutoControlPanel.h
+../addons-all/ofxControlPanel/src/guiIncludes.h
 
 ../addons-all/ofxGuiExtended/src/DOM/Types.h
 ../addons-all/ofxGuiExtended/src/DOM/Exceptions.h
@@ -448,7 +448,28 @@ addons/libs/libsvgtiny/svgtiny.c
 ../addons-all/ofxBlender/src/Parser.h
 ../addons-all/ofxBlender/src/ofxBlender.h
 
-../addons-all/ofxFatLines/sincosineLut.h
-../addons-all/ofxFatLines/sincosineLut.cpp
-../addons-all/ofxFatLines/ofxFatLine.h
-../addons-all/ofxFatLines/ofxFatLine.cpp
+../addons-all/ofxFatLines/src/sincosineLut.h
+../addons-all/ofxFatLines/src/sincosineLut.cpp
+../addons-all/ofxFatLines/src/ofxFatLine.h
+../addons-all/ofxFatLines/src/ofxFatLine.cpp
+
+../addons-all/ofxHistoryPlot/src/ofxHistoryPlot.h
+../addons-all/ofxHistoryPlot/src/ofxHistoryPlot.cpp
+
+../addons-all/ofxBillboard/src/ofxBillboard.h
+../addons-all/ofxBillboard/src/ofxBillboard.cpp
+
+../addons-all/ofx2dFluid/src/ofx2dFluidConstants.h
+../addons-all/ofx2dFluid/src/ofx2dSolver.h
+../addons-all/ofx2dFluid/src/ofx2dFluid.cpp
+../addons-all/ofx2dFluid/src/ofx2dFluid.h
+../addons-all/ofx2dFluid/src/ofx2dFluidMain.h
+
+../addons-all/ofxMPMFluid/src/ofxMPMObstacle.cpp
+../addons-all/ofxMPMFluid/src/ofxMPMObstacle.h
+../addons-all/ofxMPMFluid/src/ofxMPMParticle.cpp
+../addons-all/ofxMPMFluid/src/ofxMPMParticle.h
+../addons-all/ofxMPMFluid/src/ofxMPMNode.cpp
+../addons-all/ofxMPMFluid/src/ofxMPMNode.h
+../addons-all/ofxMPMFluid/src/ofxMPMFluid.cpp
+../addons-all/ofxMPMFluid/src/ofxMPMFluid.h

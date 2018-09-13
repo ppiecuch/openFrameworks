@@ -1,6 +1,6 @@
 !libs/imgui/src/stb_textedit.h
-:libs/imgui/src/stb_truetype.h
-:libs/imgui/src/stb_rect_pack.h
+!libs/imgui/src/stb_truetype.h
+!libs/imgui/src/stb_rect_pack.h
 :libs/imgui/src/imgui_internal.h
 libs/imgui/src/imgui.h
 

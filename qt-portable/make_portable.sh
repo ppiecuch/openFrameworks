@@ -64,9 +64,10 @@ function process_module {
     echo "/* `date` */" > "$OUTC"
     echo "#include \"+++++\"" >> "$OUTC"
 
-    for f in `cat $list`; do
+    cat "$list" | while read f; do
+        org=$f
         ctr=${f:0:1}
-        if [[ $ctr == '!' || $ctr == ':' ]]; then
+        if [[ $ctr == '!' || $ctr == ':' || $ctr == '#' ]]; then
             f=${f#?}
         fi
 
@@ -81,7 +82,9 @@ function process_module {
         FILENAME=`basename "$f" | sed 's/\(.*\)\..*/\1/'`
         DIRPATH=`dirname "$f"`
 
-        if [ ! -f "$f" ]; then
+        if [[ $ctr == '#' ]]; then
+            gsed -i "2i$org" "$OUTH"
+        elif [ ! -f "$f" ]; then
             echo -n "_"
         elif [ ".$EXT" == ".h" -o ".$EXT" == ".hpp" -o ".$EXT" == ".inl" ]; then
             case $ctr in
@@ -111,9 +114,9 @@ function process_module {
     done
     echo " Ok (merge '$nm')"
     # inline headers
-    for f in `cat $list`; do
+    cat "$list" | while read f; do
         ctr=${f:0:1}
-        if [[ $ctr == '!' || $ctr == ':' ]]; then
+        if [[ $ctr == '!' || $ctr == ':'  || $ctr == '#' ]]; then
             f=${f#?}
         fi
 
@@ -126,13 +129,13 @@ function process_module {
         f=${f%%[[:cntrl:]]}
         FNEXT=`basename "$f"`
 
-        if [ $ctr == '!' ]; then
+        if [[ $ctr == '!' ]]; then
             echo -n "!" # inline
-            sed -i "" -e "/#include \".*$FNEXT\"/r $f" -e "s/#include \"\(.*\)$FNEXT\"/\/\/ inline \1$FNEXT/" "$OUTC" "$OUTH"
+            sed -i "" -e "/^[ ]*#[ ]*include \".*$FNEXT\"/r $f" -e "s/#include \"\(.*\)$FNEXT\"/\/\/ inline \1$FNEXT/" "$OUTC" "$OUTH"
         fi
     done
     # fix #include
-    for f in `cat $list`; do
+    cat "$list" | while read f; do
         f=${f%%[[:cntrl:]]}
         EXT=${f##*.}
         FNEXT=`basename "$f"`
@@ -140,8 +143,8 @@ function process_module {
         if [ ".$EXT" == ".h" -o ".$EXT" == ".hpp" -o ".$EXT" == ".inl" ]; then
             echo -n "."
             sed -i "" \
-                -e "s/#[ ]*include \"\(.*\)$FNEXT\"/\/\* #include \"\1$FNEXT\" \*\//g" \
-                -e "s/#[ ]*include \<$FNEXT\>/\/\* #include \<$FNEXT\> \*\//g" \
+                -e "s/^[ ]*#[ ]*include \"\(.*\)$FNEXT\"/\/\* #include \"\1$FNEXT\" \*\//g" \
+                -e "s/^[ ]*#[ ]*include \<$FNEXT\>/\/\* #include \<$FNEXT\> \*\//g" \
                 "$OUTC" "$OUTH"
         fi
     done
