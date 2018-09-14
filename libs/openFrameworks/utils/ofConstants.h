@@ -192,7 +192,7 @@ namespace std { namespace filesystem {
     inline bool remove_all(const path& p) { return QDir().rmpath(p.string().c_str()); }
     inline bool create_directories(const path& p) { return QDir().mkpath(p.string().c_str()); }
     inline bool create_directory(const path& p) { return QDir().mkdir(p.string().c_str()); }
-    inline path canonical(const path& p) { return QFileInfo(p.string().c_str()). canonicalFilePath().toStdString(); }
+    inline path canonical(const path& p) { return QFile::exists(p.string().c_str())?QFileInfo(p.string().c_str()).canonicalFilePath().toStdString():QFileInfo(p.string().c_str()).absoluteFilePath().toStdString(); }
     inline path absolute(const path& p) { return QFileInfo(p.string().c_str()).absoluteFilePath().toStdString(); }
     inline bool is_regular_file(const path &p) { QFileInfo(p.string().c_str()).isFile(); }
 	inline bool is_symlink(const path &p) { QFileInfo(p.string().c_str()).isSymLink(); }
